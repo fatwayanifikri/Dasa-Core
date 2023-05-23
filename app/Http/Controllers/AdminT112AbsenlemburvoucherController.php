@@ -1,9 +1,11 @@
 <?php namespace App\Http\Controllers;
 
+// Controller untuk pengajuan voucher lembur oleh HRD
 	use Session;
 	use Request;
 	use DB;
 	use CRUDBooster;
+	use Carbon\Carbon;
 
 	class AdminT112AbsenlemburvoucherController extends \crocodicstudio\crudbooster\controllers\CBController {
 
@@ -17,9 +19,9 @@
 			$this->button_table_action = true;
 			$this->button_bulk_action = true;
 			$this->button_action_style = "button_icon";
-			$this->button_add = true;
+			$this->button_add = false;
 			$this->button_edit = true;
-			$this->button_delete = true;
+			$this->button_delete = false;
 			$this->button_detail = true;
 			$this->button_show = true;
 			$this->button_filter = true;
@@ -30,29 +32,45 @@
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
-			$this->col[] = ["label"=>"Departement Id","name"=>"Departement_id","join"=>"hrdm102_departement,DepartementName"];
-			$this->col[] = ["label"=>"Employee Id","name"=>"Employee_id","join"=>"hrde200_employee,EmployeeName"];
-			$this->col[] = ["label"=>"Unit Id","name"=>"Unit_id","join"=>"hrdm101_unit,UnitName"];
-			$this->col[] = ["label"=>"Company Id","name"=>"Company_id","join"=>"hrdm100_company,CompanyName"];
-			$this->col[] = ["label"=>"Jabatan Id","name"=>"Jabatan_id","join"=>"cms_privileges,name"];
-			$this->col[] = ["label"=>"EmployeeName","name"=>"EmployeeName"];
+			//$this->col[] = ["label"=>"Departement Id","name"=>"Departement_id","join"=>"hrdm102_departement,DepartementName"];
+			$this->col[] = ["label"=>"Karyawan","name"=>"Employee_id","join"=>"hrde200_employee,EmployeeName"];
+			$this->col[] = ["label"=>"Unit","name"=>"Unit_id","join"=>"hrdm101_unit,UnitName"];
+			$this->col[] = ["label"=>"Jabatan","name"=>"Jabatan_id","join"=>"cms_privileges,name"];
+			//$this->col[] = ["label"=>"EmployeeName","name"=>"EmployeeName"];
 			$this->col[] = ["label"=>"StartTime","name"=>"StartTime"];
-			# END COLUMNS DO NOT REMOVE THIS LINE
+			$this->col[] = ["label"=>"EndTime","name"=>"EndTime"];
+			$this->col[] = ["label"=>"Menit Lemburan","name"=>"AmountMinute"];
+			$this->col[] = ["label"=>"Approve Lembur","name"=>"isApproved"];
+			$this->col[] = ["label"=>"Status Voucher","name"=>"isVoucher"];
+			$this->col[] = ["label"=>"Nomor Voucher","name"=>"NomerVoucher"];
+			$this->col[] = ["label"=>"Tgl Pengajuan","name"=>"tgl_pengajuan_voucher"];
 
+			# END COLUMNS DO NOT REMOVE THIS LINE
+			$EmployeeID=Crudbooster::myId();
+			$EmpID=DB::table('cms_users')
+					->where('id','=',$EmployeeID)
+					->value('Employee_id');
+			$getUnitID=CRUDBooster::myUnitIDKeep();
+			$getJabatan=CRUDBooster::myPrivilegeId();
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
-			$this->form[] = ['label'=>'Departement Id','name'=>'Departement_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'Departement,id'];
-			$this->form[] = ['label'=>'Employee Id','name'=>'Employee_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'Employee,id'];
-			$this->form[] = ['label'=>'Unit Id','name'=>'Unit_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'Unit,id'];
-			$this->form[] = ['label'=>'Company Id','name'=>'Company_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'Company,id'];
-			$this->form[] = ['label'=>'Jabatan Id','name'=>'Jabatan_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'Jabatan,id'];
-			$this->form[] = ['label'=>'EmployeeName','name'=>'EmployeeName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'StartTime','name'=>'StartTime','type'=>'time','validation'=>'required|date_format:H:i:s','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'EndTime','name'=>'EndTime','type'=>'time','validation'=>'required|date_format:H:i:s','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'AmountMinute','name'=>'AmountMinute','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'NomerVoucher','name'=>'NomerVoucher','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Note','name'=>'Note','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'IsApproved','name'=>'isApproved','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+		//	$this->form[] = ['label'=>'Departement','name'=>'Departement_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrdm102_departement,DepartementName'];
+			$this->form[] = ['label'=>'Nama Karyawan','name'=>'Employee_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-6','datatable'=>'hrde200_employee,EmployeeName','datatable_select_to'=>'EmployeeName:EmployeeName',"readonly"=>'true'];
+			$this->form[] = ['label'=>'Unit','name'=>'Unit_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-6','datatable'=>'hrdm101_unit,UnitName',"readonly"=>'true'];
+			$this->form[] = ['label'=>'Perusahaan','name'=>'Company_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-6','datatable'=>'hrdm100_company,CompanyName',"readonly"=>'true'];
+			$this->form[] = ['label'=>'Jabatan','name'=>'Jabatan_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-6','datatable'=>'cms_privileges,Name',"readonly"=>'true'];
+			//$this->form[] = ['label'=>'Nama Karyawan','name'=>'EmployeeName','type'=>'hidden','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			//dimatiin ga perlu 
+			//$this->form[] = ['label'=>'Tanggal Lembur','name'=>'ExtraTimeDate','type'=>'date','validation'=>'required|date','width'=>'col-sm-2'];
+			$this->form[] = ['label'=>'Mulai Lembur','name'=>'StartTime','type'=>'datetime','id'=>'StartTime','validation'=>'required','width'=>'col-sm-2'];
+			$this->form[] = ['label'=>'Selesai Lembur','name'=>'EndTime','type'=>'datetime','id'=>'EndTime','validation'=>'required','width'=>'col-sm-2'];
+			$this->form[] = ['label'=>'Menit Lembur','name'=>'AmountMinute','type'=>'number','id'=>'AmountMinute','validation'=>'required|integer|min:0','width'=>'col-sm-2','readonly'=>'true'];
+			$this->form[] = ['label'=>'Nomer Voucher','name'=>'NomerVoucher','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-4'];
+			$this->form[] = ['label'=>'Jumlah Voucher','name'=>'JumlahVoucher','type'=>'number','id'=>'JumlahVoucher','validation'=>'required|integer|min:0','width'=>'col-sm-2'];
+			$this->form[] = ['label'=>'Nilai Voucher','name'=>'NilaiVoucher','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-2',"readonly"=>'true'];
+			$this->form[] = ['label'=>'Note','name'=>'Note','type'=>'textarea','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Persetujuan','name'=>'isApproved','type'=>'hidden'];
+			$this->form[] = ['label'=>'Voucher','name'=>'isVoucher','type'=>'hidden','value'=>'1'];
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
@@ -98,6 +116,46 @@
 	        | 
 	        */
 	        $this->addaction = array();
+			$EmployeeID=Crudbooster::myId();
+			$EmpID=DB::table('cms_users')
+					->where('id','=',$EmployeeID)
+					->value('Employee_id');
+			$getUnitID=CRUDBooster::myUnitIDKeep();
+			$getJabatan=CRUDBooster::myPrivilegeId();
+
+		
+			if(CRUDBooster::MyPrivilegeId()==1){
+				$this->addaction[] = ['label'=>'Ajukan Voucher','url'=>('VoucherPengajuan').'/[id]','icon'=>'fa fa-check','color'=>'success','showIf'=>"[isApproved] == 1 & [isVoucher] == 1" ];
+
+			}
+
+			elseif(CRUDBooster::MyPrivilegeId()==62){
+				$this->addaction[] = ['label'=>'Ajukan Voucher','url'=>('VoucherPengajuan').'/[id]','icon'=>'fa fa-check','color'=>'success','showIf'=>"[isApproved] == 1 & [isVoucher] == 1" ];
+
+			
+			}
+
+			elseif(CRUDBooster::MyPrivilegeId()==63){
+				$this->addaction[] = ['label'=>'Ajukan Voucher','url'=>('VoucherPengajuan').'/[id]','icon'=>'fa fa-check','color'=>'success','showIf'=>"[isApproved] == 1 & [isVoucher] == 1" ];
+
+			
+            }
+
+            elseif(CRUDBooster::MyPrivilegeId()==64){
+				$this->addaction[] = ['label'=>'Ajukan Voucher','url'=>('VoucherPengajuan').'/[id]','icon'=>'fa fa-check','color'=>'success','showIf'=>"[isApproved] == 1 & [isVoucher] == 1" ];
+
+			}
+
+			elseif(CRUDBooster::MyPrivilegeId()==65){
+				$this->addaction[] = ['label'=>'Ajukan Voucher','url'=>('VoucherPengajuan').'/[id]','icon'=>'fa fa-check','color'=>'success','showIf'=>"[isApproved] == 1 & [isVoucher] == 1" ];
+
+			}
+
+			elseif(CRUDBooster::MyPrivilegeId()==66){
+				$this->addaction[] = ['label'=>'Ajukan Voucher','url'=>('VoucherPengajuan').'/[id]','icon'=>'fa fa-check','color'=>'success','showIf'=>"[isApproved] == 1 & [isVoucher] == 1" ];
+
+			}
+			
 
 
 	        /* 
@@ -134,7 +192,7 @@
 	        | @icon  = Icon from Awesome.
 	        | 
 	        */
-	        $this->index_button = array();
+	        $this->index_button[] = ['label'=>'Export','url'=>('export_pengajuan_voucher'),'icon'=>'fa fa-download','color'=>'primary'];
 
 
 
@@ -147,7 +205,8 @@
 	        | 
 	        */
 	        $this->table_row_color = array();     	          
-
+			$this->table_row_color[] = ['condition'=>"[isVoucher]==2","color"=>"success"];
+	        $this->table_row_color[] = ['condition'=>"[isVoucher]==1","color"=>"warning"];
 	        
 	        /*
 	        | ---------------------------------------------------------------------- 
@@ -168,7 +227,31 @@
 	        | $this->script_js = "function() { ... }";
 	        |
 	        */
-	        $this->script_js = NULL;
+	        $this->script_js = "
+				
+			$(function(){
+
+				setInterval(function(){
+
+				var nilai1 = $('#JumlahVoucher').val();
+				var nvoucher = $('12500').val();
+				var calculate=Math.abs(12500 * nilai1);
+				$('#NilaiVoucher').val(calculate);
+			},500);
+
+			// $(function(){
+	        // 	setInterval(function(){
+
+	        // 		var Cuti=$(cuti_saldo).val();
+	        // 		var Lama=$(cuti_lama).val();
+
+	        // 		var calculate=Math.abs(Cuti - Lama);
+	        // 		$('#cuti_sisa').val(calculate);
+
+	        // 		},500);
+
+	        	})
+	        ";
 
 
             /*
@@ -254,9 +337,45 @@
 	    | @query = current sql query 
 	    |
 	    */
-	    public function hook_query_index(&$query) {
+	   public function hook_query_index(&$query) {
+		$EmployeeID=Crudbooster::myId();
+		$EmpID=DB::table('cms_users')
+				->where('id','=',$EmployeeID)
+				->value('Employee_id');
+		$getUnitID=CRUDBooster::myUnitIDKeep();
+		$getJabatan=CRUDBooster::myPrivilegeId();
+	//	dd($getJabatan);
 	        //Your code here
-	            
+	        if($getJabatan == 1){
+				$query->whereIn('isVoucher',[2,1])
+				->orderBy('StartTime','desc')
+				->get();
+			}
+			elseif($getJabatan == 62){
+				$query->whereIn('isVoucher',[2,1])
+				->orderBy('StartTime','desc')
+				->get();
+			}
+			elseif($getJabatan == 63){
+				$query->whereIn('isVoucher',[2,1])
+				->orderBy('StartTime','desc')
+				->get();
+			}
+			elseif($getJabatan == 64){
+				$query->whereIn('isVoucher',[2,1])
+				->orderBy('StartTime','desc')
+				->get();
+			}
+			elseif($getJabatan == 65){
+				$query->whereIn('isVoucher',[2,1])
+				->orderBy('StartTime','desc')
+				->get();
+			}
+			elseif($getJabatan == 66){
+				$query->whereIn('isVoucher',[2,1])
+				->orderBy('StartTime','desc')
+				->get();
+			}
 	    }
 
 	    /*
@@ -265,7 +384,39 @@
 	    | ---------------------------------------------------------------------- 
 	    |
 	    */    
-	    public function hook_row_index($column_index,&$column_value) {	        
+	    public function hook_row_index($column_index,&$column_value) {	    
+			if($column_index == 7){
+				if($column_value == 0 )
+				{
+					$column_value = 'Tidak Di Setujui';
+				}
+				else
+				{
+					
+					$column_value = 'Setuju';
+				}
+
+			}
+			if($column_index == 8){
+				if($column_value == 0){
+					$column_value ='Blm Dibuat';
+				}
+				elseif($column_value == 1){
+					$column_value = 'Dibuat';
+				}
+				elseif($column_value == 2){
+					$column_value = 'Diajukan';
+				}
+				elseif($column_value == 3){
+					$column_value = 'Dicairkan';
+				}
+				elseif($column_value == 4){
+					$column_value = 'Diterima';
+				}
+				elseif ($column_value == 0) {
+					$column_value = '';
+				}
+			}
 	    	//Your code here
 	    }
 
@@ -277,7 +428,7 @@
 	    |
 	    */
 	    public function hook_before_add(&$postdata) {        
-	        //Your code here
+
 
 	    }
 
@@ -303,7 +454,7 @@
 	    */
 	    public function hook_before_edit(&$postdata,$id) {        
 	        //Your code here
-
+	      
 	    }
 
 	    /* 
@@ -314,7 +465,7 @@
 	    | 
 	    */
 	    public function hook_after_edit($id) {
-	        //Your code here 
+	              
 
 	    }
 
@@ -342,52 +493,57 @@
 
 	    }
 
-		public function getIndex()
-		{
-		 return view('viewindex/list_lembur');
+// ============ update statusvoucher =======
+		public function VoucherBuat($id){
+
+			Carbon::now()->timezone('Asia/Jakarta');
+	        $tgl_buat = Carbon::now();
+
+			DB::table('t112_absenlembur')->where('id',$id)->update(['isVoucher'=>'1']);
+			DB::table('t112_absenlembur')->where('id',$id)->update(['tgl_pembuatan_voucher'=>$tgl_buat]);
+			
+            redirect('admin/pembuatan_voucher_lembur/edit/'.$id)->send();
+
 		}
+
+		public function VoucherPengajuan($id){
+			Carbon::now()->timezone('Asia/Jakarta');
+	        $tgl_pengajuan = Carbon::now();
+			DB::table('t112_absenlembur')->where('id',$id)->update(['isVoucher'=>'2']);
+			DB::table('t112_absenlembur')->where('id',$id)->update(['tgl_pengajuan_voucher'=>$tgl_pengajuan]);
+			
+			//This will redirect back and gives a message
+			CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"Voucher berhasil di ajukan !","info");
+		}
+
+		public function VoucherCair($id){
+			Carbon::now()->timezone('Asia/Jakarta');
+	        $tgl_cair = Carbon::now();
+
+			DB::table('t112_absenlembur')->where('id',$id)->update(['isVoucher'=>'3']);
+			DB::table('t112_absenlembur')->where('id',$id)->update(['tgl_pencairan_voucher'=>$tgl_cair]);
+			
+			//This will redirect back and gives a message
+			CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"Voucher telah di cairkan !","info");
+		}
+
+		public function VoucherTerima($id){
+			DB::table('t112_absenlembur')->where('id',$id)->update(['isVoucher'=>'4']);
+			
+			//This will redirect back and gives a message
+			CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"Uang Lembur telah di terima !","info");
+
+		}
+
+
+// ===============================================
 	
-		//public function fetch_data(Request $request)
-		function fetch_data(Request $request)
-		{
-		 if($request->ajax())
-		 {
-		  if($request->from_date != '' && $request->to_date != '')
-		  {
-		   $data = DB::table('t112_absenlembur as al')
-			->select(['al.Employee_id',
-					  'e.NPK',
-					  'e.EmployeeName',
-					  'e.Unit_id',
-					  'u.UnitName',
-					  'al.AmountMinute'
-			])
-			 ->join('hrde200_employee as e','e.id','=','al.Eployee_id')
-			 ->join('hrdm101_Unit as u','u.id','=','e.Unit_id')
-			 ->whereBetween('al.EndTime', array($request->from_date, $request->to_date))
-			 ->get();
-		  }
-		  
-		  else
-		  {
-			$data = DB::table('t112_absenlembur as al')
-			->select(['al.Employee_id',
-					  'e.NPK',
-					  'e.EmployeeName',
-					  'e.Unit_id',
-					  'u.UnitName',
-					  'al.AmountMinute'
-			])
-			 ->join('hrde200_employee as e','e.id','=','al.Eployee_id')
-			 ->join('hrdm101_Unit as u','u.id','=','e.Unit_id')
-			->orderBy('EndTime', 'desc')->get();
-		  }
-		  echo json_encode($data);
-		 }
-		}
+		
+    }
+
 
 
 	    //By the way, you can still create your own method in here... :) 
 
 
-	}
+	//}

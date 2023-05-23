@@ -52,7 +52,9 @@ return [
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
             'prefix_indexes' => true,
-            'strict' => true,
+
+             // Ubah strict ke false untuk groupby by 1 colom saja
+            'strict' => false,
             'engine' => null,
         ],
 

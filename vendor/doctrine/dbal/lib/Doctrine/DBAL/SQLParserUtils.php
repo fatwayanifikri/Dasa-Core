@@ -26,6 +26,8 @@ use const PREG_OFFSET_CAPTURE;
 
 /**
  * Utility class that parses sql statements with regard to types and parameters.
+ *
+ * @internal
  */
 class SQLParserUtils
 {
@@ -222,13 +224,13 @@ class SQLParserUtils
 
         foreach ($paramPos as $pos => $paramName) {
             $paramLen = strlen($paramName) + 1;
-            $value    = static::extractParam($paramName, $params, true);
+            $value    = self::extractParam($paramName, $params, true);
 
             if (! isset($arrayPositions[$paramName]) && ! isset($arrayPositions[':' . $paramName])) {
                 $pos         += $queryOffset;
                 $queryOffset -= $paramLen - 1;
                 $paramsOrd[]  = $value;
-                $typesOrd[]   = static::extractParam($paramName, $types, false, ParameterType::STRING);
+                $typesOrd[]   = self::extractParam($paramName, $types, false, ParameterType::STRING);
                 $query        = substr($query, 0, $pos) . '?' . substr($query, $pos + $paramLen);
 
                 continue;
@@ -239,7 +241,7 @@ class SQLParserUtils
 
             foreach ($value as $val) {
                 $paramsOrd[] = $val;
-                $typesOrd[]  = static::extractParam($paramName, $types, false) - Connection::ARRAY_PARAM_OFFSET;
+                $typesOrd[]  = self::extractParam($paramName, $types, false) - Connection::ARRAY_PARAM_OFFSET;
             }
 
             $pos         += $queryOffset;

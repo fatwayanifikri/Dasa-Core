@@ -16,8 +16,17 @@
 			$this->button_action_style = 'button_icon';	
 			$this->button_import 	   = FALSE;	
 			$this->button_export 	   = FALSE;	
+			$this->button_delete = false;
 			$this->limit               = 10;
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
+$companyID=CRUDBooster::myCompanyID();
+			$ResultID = DB::select('select uuid_short() as id');
+            $getUnitID=Crudbooster::myUnitId();
+			$getJabatan=Crudbooster::myPrivilegeId();
+			$EmployeeID=Crudbooster::myId();
+			$EmpID=DB::table('cms_users')
+					->where('id','=',$EmployeeID)
+					->value('Employee_id');
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = array();
@@ -89,6 +98,7 @@
 	        | 
 	        */
 	        $this->addaction = array();
+	        $this->addaction[] = ['url'=>('delete_user').'/[id]','title'=>'Delete','icon'=>'fa fa-trash','color'=>'danger','confirmation' => true,];
 
 
 	        /* 
@@ -281,7 +291,11 @@
 	    | 
 	    */
 	    public function hook_after_add($id) {        
-	        //Your code here
+	   //       $EmployeeID = Request::get('Employee_id');
+			 // $JabatanBaru= Request::get('Privileges_id');
+
+			 // DB::table('hrde200_employee')->where('id',$EmployeeID)->update(['Jabatan_id' => $JabatanBaru]);
+			 // DB::table('cms_users')->where('Employee_id',$EmployeeID)->update(['id_cms_privileges' => $JabatanBaru]);
 
 	    }
 
@@ -352,5 +366,15 @@
 			$data['row']        = CRUDBooster::first('cms_users',CRUDBooster::myId());		
 			$this->cbView('crudbooster::default.form',$data);				
 		}
+
+	public function delete_user($id){
+
+       DB::table('cms_users')
+		   ->where('id','=',$id)
+           ->delete();
+
+      CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"Hapus Data Berhasil !","success");
+ 
+       }
 
 	}

@@ -14,4 +14,5 @@ class hrdt200_interview extends Model
     {
         return $this->belongsTo('App\Models\hrde100_pelamar');
     }
+    
 }

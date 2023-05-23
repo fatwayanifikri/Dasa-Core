@@ -19,7 +19,7 @@
 			$this->button_action_style = "button_icon";
 			$this->button_add = true;
 			$this->button_edit = true;
-			$this->button_delete = true;
+			$this->button_delete = false;
 			$this->button_detail = true;
 			$this->button_show = true;
 			$this->button_filter = true;
@@ -36,7 +36,7 @@
 		//	$this->col[] = ["label"=>"Jabatan ","name"=>"Jabatan_id","join"=>"cms_privileges,name"];
 			$this->col[] = ["label"=>"Perusahaan ","name"=>"Company_id","join"=>"hrdm100_company,CompanyName"];
 			$this->col[] = ["label"=>"Tanggal Permintaan","name"=>"RequestDate"];
-			$this->col[] = ["label"=>"Request Jabatan","name"=>"(select cms.name from hrdt101_detailrequest join cms_privileges AS cms ON cms.id = hrdt101_detailrequest.Jabatan_id WHERE employeerequest_id = hrdt100_employeerequest.id ) as Jabatan"];
+			// $this->col[] = ["label"=>"Request Jabatan","name"=>"(select cms.name from hrdt101_detailrequest join cms_privileges AS cms ON cms.id = hrdt101_detailrequest.Jabatan_id WHERE employeerequest_id = hrdt100_employeerequest.id ) as Jabatan"];
 			$this->col[] = ["label"=>"Status","name"=>"isProcess","join"=>"hrdm110_approvalstatus,ApprovalName"];
 			
 
@@ -58,17 +58,25 @@
 			# GET KEBUTUHAN DATA 
 			$getUnitID = CRUDBooster::myUnitId();
 			$getJabatan = CRUDBooster::myPrivilegeId();
+			$EmployeeID=Crudbooster::myId();
+			$EmpID=DB::table('cms_users')
+					->where('id','=',$EmployeeID)
+					->value('Employee_id');
+
+			$getUnitID=CRUDBooster::myUnitIDKeep();
+			$getJabatan=CRUDBooster::myPrivilegeId();
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
 		    $this->form[] = ['label'=>'hdfemployeerequestid','name'=>'id','type'=>'hidden','value'=>$ResultID[0]->id];
 			$this->form[] = ['label'=>'Nomer Dokumen','name'=>'NomerDokumen','type'=>'text','width'=>'col-sm-10','value'=>$hasilKode,'readonly'=>true];
-			$this->form[] = ['label'=>'Nama Karyawan Request','name'=>'Employee_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrde200_employee,EmployeeName','datatable_where'=>'Unit_id='.CRUDBooster::myUnitId()];
+			// $this->form[] = ['label'=>'Nama Karyawan Request','name'=>'Employee_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrde200_employee,EmployeeName','datatable_where'=>'Unit_id='.CRUDBooster::myUnitId()];
+			$this->form[] = ['label'=>'Nama Peminta Request','name'=>'Employee_id','type'=>'select','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrde200_employee,EmployeeName','value'=>$EmpID,'readonly'=>true];
+
 			$this->form[] = ['label'=>'Unit','name'=>'Unit_id','type'=>'select','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrdm101_unit,UnitName','value'=>$getUnitID,'readonly'=>true];
 			$this->form[] = ['label'=>'Jabatan','name'=>'Jabatan_id','type'=>'hidden','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'cms_privileges,name','value'=>$getJabatan,'readonly'=>true];
 			$this->form[] = ['label'=>'Perusahaan ','name'=>'Company_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrdm100_company,CompanyName'];
 			$this->form[] = ['label'=>'Request Date','name'=>'RequestDate','type'=>'date','validation'=>'required|date','value'=>date('Y-m-d', time()),'width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'isProcess','name'=>'isProcess','type'=>'hidden','value'=>'1'];
-			
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# CHILD
@@ -124,19 +132,20 @@
 	        | 
 	        */
 			$this->addaction = array();
-			$JabatanID = CRUDBooster::myPrivilegeId();
-			//$getPrivilegeID = CRUDBooster::getMyPrivilegeId();
-			//HRDManager
-			if($JabatanID == '12'){
-				$this->addaction[] = ['label'=>'Setujui','name'=>'setuju_sm','url'=>('ApproveStoreManager').'/[id]','icon'=>'fa fa-check','color'=>'success','showIf'=>"[isProcess] == 1"];
-			}
-			elseif($JabatanID == '64'){
-				$this->addaction[] = ['label'=>'Process','name'=>'setuju_rc','url'=>('ApproveRecruitment').'/[id]','icon'=>'fa fa-check','color'=>'success','showIf'=>"[isProcess] == 2"];
-			}
-			elseif($JabatanID == '8'){
-				$this->addaction[] = ['label'=>'Setujui','url'=>CRUDBooster::mainpath('set-status/active/[id]'),'icon'=>'fa fa-check','color'=>'success','showIf'=>"[isProcess] == 3"];
-				$this->addaction[] = ['label'=>'Tidak Setujui','name'=>'tolak_hr','url'=>('HRDManager').'/[id]','icon'=>'fa fa-check','color'=>'danger','showIf'=>"[isProcess] == 3",'confirmation' =>true];
-			}
+			$this->addaction[] = ['url'=>('hapus_request').'/[id]','icon'=>'fa fa-trash','color'=>'danger','confirmation' => true];
+			// $JabatanID = CRUDBooster::myPrivilegeId();
+			// //$getPrivilegeID = CRUDBooster::getMyPrivilegeId();
+			// //HRDManager
+			// if($JabatanID == '12'){
+			// 	$this->addaction[] = ['label'=>'Setujui','name'=>'setuju_sm','url'=>('ApproveStoreManager').'/[id]','icon'=>'fa fa-check','color'=>'success','showIf'=>"[isProcess] == 1"];
+			// }
+			// elseif($JabatanID == '64'){
+			// 	$this->addaction[] = ['label'=>'Process','name'=>'setuju_rc','url'=>('ApproveRecruitment').'/[id]','icon'=>'fa fa-check','color'=>'success','showIf'=>"[isProcess] == 2"];
+			// }
+			// elseif($JabatanID == '8'){
+			// 	$this->addaction[] = ['label'=>'Setujui','url'=>CRUDBooster::mainpath('set-status/active/[id]'),'icon'=>'fa fa-check','color'=>'success','showIf'=>"[isProcess] == 3"];
+			// 	$this->addaction[] = ['label'=>'Tidak Setujui','name'=>'tolak_hr','url'=>('HRDManager').'/[id]','icon'=>'fa fa-check','color'=>'danger','showIf'=>"[isProcess] == 3",'confirmation' =>true];
+			// }
 		
 			
 
@@ -327,24 +336,38 @@
 	    |
 	    */
 	    public function hook_query_index(&$query) {
-			//Your code here
-			 $getUnitID = CRUDBooster::myUnitIDKeep();
+    //Your code here
+			$EmployeeID=Crudbooster::myId();
+			$EmpID=DB::table('cms_users')
+					->where('id','=',$EmployeeID)
+					->value('Employee_id');
+			$getUnitID=CRUDBooster::myUnitIDKeep();
+			$getJabatan=CRUDBooster::myPrivilegeId();
 
-			 if($getUnitID != 0)
-			 {
-				 if($getUnitID == 1)
-				 {
-					 $query;
-				 }
-				 else
-				 {
-					$query->where('hrdt100_employeerequest.Unit_id',$getUnitID);
-				 }
-				 
-				 
-			 }
-		    
-	        
+			if($getJabatan == 1){
+				$query;
+			}
+			elseif($getJabatan == 62){
+				$query;
+			}
+			elseif($getJabatan == 63){
+				$query;
+			}
+			elseif($getJabatan == 64){
+				$query;
+			}
+			elseif($getJabatan == 65){
+				$query;
+			}
+			elseif($getJabatan == 66){
+				$query;
+			}
+			elseif($getJabatan == 16){
+				$query;
+			}
+			else{
+				$query->where('hrdt100_employeerequest.Employee_id',$EmpID);
+			}
 	    }
 
 	    /*
@@ -391,7 +414,6 @@
 							->where('Unit_id',$getUnitID)
 							->where('id_cms_privileges','12')
 							->pluck('id');
-		
 
 		
 				$config['content'] = "Request Permintaan Karyawan Baru";
@@ -526,5 +548,17 @@
 
 	    //By the way, you can still create your own method in here... :) 
 
+
+	    public function hapus_request($id){
+
+	   DB::table('hrdt100_employeerequest')->where('id',$id)->delete();
+	   redirect('admin/hapus_request_detail/'.$id)->send();
+          }
+
+       public function hapus_request_detail($id){
+
+	   DB::table('hrdt101_detailrequest')->where('EmployeeRequest_id',$id)->delete();
+	   CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"Data Berhasil Dihapus!","success");
+          }
 
 	}

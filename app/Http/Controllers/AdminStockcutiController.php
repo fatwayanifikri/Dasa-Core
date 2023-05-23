@@ -19,7 +19,7 @@
 			$this->button_action_style = "button_icon";
 			$this->button_add = true;
 			$this->button_edit = true;
-			$this->button_delete = true;
+			$this->button_delete = false;
 			$this->button_detail = true;
 			$this->button_show = true;
 			$this->button_filter = true;
@@ -31,7 +31,7 @@
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
 			$this->col[] = ["label"=>"Nama Karyawan","name"=>"Employee_id","join"=>"hrde200_employee,EmployeeName"];
-			$this->col[] = ["label"=>"Jabatan","name"=>"Jabatan_id","join"=>"hrdm104_jabatan,NamaJabatan"];
+			$this->col[] = ["label"=>"Jabatan","name"=>"Jabatan_id","join"=>"cms_privileges,name"];
 			$this->col[] = ["label"=>"Unit","name"=>"Unit_id","join"=>"hrdm101_unit,UnitName"];
 			$this->col[] = ["label"=>"Perusahaan","name"=>"Company_id","join"=>"hrdm100_company,CompanyName"];
 			$this->col[] = ["label"=>"Year","name"=>"Tahun"];
@@ -41,8 +41,9 @@
 
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
-			$this->form[] = ['label'=>'Nama Karyawan','name'=>'Employee_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrde200_employee,EmployeeName'];
-			$this->form[] = ['label'=>'Jabatan','name'=>'Jabatan_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrdm104_jabatan,NamaJabatan'];
+			$this->form[] = ['label'=>'Nama Karyawan','name'=>'Employee_id','type'=>'datamodal','datamodal_table'=>'hrde200_employee','datamodal_where'=>'','validation'=>'required|min:1|max:255','width'=>'col-sm-5','datamodal_columns'=>'EmployeeName,NPK','datamodal_columns_alias'=>'EmployeeName,NPK','datamodal_select_to'=>'Unit_id:Unit_id,Jabatan_id:Jabatan_id,Company_id:Company_id','datamodal_size'=>'large','required'=>true];
+
+			$this->form[] = ['label'=>'Jabatan','name'=>'Jabatan_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-4','datatable'=>'cms_privileges,name'];
 			$this->form[] = ['label'=>'Unit','name'=>'Unit_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrdm101_unit,UnitName'];
 			$this->form[] = ['label'=>'Company','name'=>'Company_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrdm100_company,CompanyName'];
 			$this->form[] = ['label'=>'Year','name'=>'Tahun','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
@@ -87,7 +88,7 @@
 	        | @showIf 	   = If condition when action show. Use field alias. e.g : [id] == 1
 	        | 
 	        */
-	        $this->addaction = array();
+	        $this->addaction[] = ['url'=>('hapus_stock_cuti').'/[id]','icon'=>'fa fa-trash','color'=>'danger','confirmation' => true];
 
 
 	        /* 
@@ -245,7 +246,34 @@
 	    |
 	    */
 	    public function hook_query_index(&$query) {
-	        //Your code here
+	        $EmployeeID=Crudbooster::myId();
+			$EmpID=DB::table('cms_users')
+					->where('id','=',$EmployeeID)
+					->value('Employee_id');
+			$getUnitID=CRUDBooster::myUnitIDKeep();
+			$getJabatan=CRUDBooster::myPrivilegeId();
+
+			if($getJabatan == 1){
+				$query->orderby('Tahun','desc');
+			}
+			elseif($getJabatan == 62){
+				$query;
+			}
+			elseif($getJabatan == 63){
+				$query;
+			}
+			elseif($getJabatan == 64){
+				$query;
+			}
+			elseif($getJabatan == 65){
+				$query;
+			}
+			elseif($getJabatan == 66){
+				$query;
+			}
+			else{
+				$query->where('t200_stockcuti.Unit_id',$getUnitID)->orderby('Tahun','desc');
+			}
 	            
 	    }
 
@@ -336,5 +364,10 @@
 
 	    //By the way, you can still create your own method in here... :) 
 
+         public function hapus_stock_cuti($id){
+
+	      DB::table('t200_stockcuti')->where('id',$id)->delete();
+		  CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"Data Berhasil Dihapus!","success");
+}
 
 	}

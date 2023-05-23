@@ -4,6 +4,7 @@
 	use Request;
 	use DB;
 	use CRUDBooster;
+	use PDF;
 
 	class AdminPelamarController extends \crocodicstudio\crudbooster\controllers\CBController {
 
@@ -19,7 +20,7 @@
 			$this->button_action_style = "button_icon";
 			$this->button_add = true;
 			$this->button_edit = true;
-			$this->button_delete = true;
+			$this->button_delete = false;
 			$this->button_detail = true;
 			$this->button_show = true;
 			$this->button_filter = true;
@@ -33,7 +34,7 @@
 			$this->col[] = ["label"=>"Nama Pelamar","name"=>"NamaPelamar"];
 			$this->col[] = ["label"=>"Tempat Lahir","name"=>"TempatLahir"];
 			$this->col[] = ["label"=>"Tanggal Lahir","name"=>"TanggalLahir"];
-			$this->col[] = ["label"=>"Posisi dilamar","name"=>"Jabatan_id",'join'=>"hrdm104_jabatan,NamaJabatan"];
+			$this->col[] = ["label"=>"Posisi dilamar","name"=>"Jabatan_id",'join'=>"cms_privileges,name"];
 			$this->col[] = ["label"=>"Telp Rumah","name"=>"TelpRumah"];
 			$this->col[] = ["label"=>"Telp Hp","name"=>"TelpHp"];
 			$this->col[] = ["label"=>"Keterangan","name"=>"Keterangan"];
@@ -56,38 +57,38 @@
 			$this->form[] = ['label'=>'Telp.Hp','name'=>'TelpHp','type'=>'text','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Email','name'=>'Email','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Agama','name'=>'Agama','type'=>'select','width'=>'col-sm-10','dataenum'=>'Islam;Kristen;Katolik;Hindu;Buddha;Konghuchu'];
-			$this->form[] = ['label'=>'Posisi yang dipilih','name'=>'Jabatan_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrdm104_jabatan,NamaJabatan'];
+			$this->form[] = ['label'=>'Posisi yang dipilih','name'=>'Jabatan_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'cms_privileges,name'];
 			$this->form[] = ['label'=>'Gaji yang di harapkan','name'=>'Gaji','type'=>'money','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'hdfFinalApprove','name'=>'FinalApprove','type'=>'hidden','value'=>'0'];
 			$this->form[] = ['label'=>'hdfFinalApprovePKWT','name'=>'isApprovePKWT','type'=>'hidden','value'=>'0'];
 			//$this->form[] = ['label'=>'Tipe identitas','name'=>'tipeidentitas_id','type'=>'select2','datatable'=>'hrdm106_tipeidentitas','relationship_table'=>'hrde101_pelamaridentity'];
-			$columns = [];
-			$columns[] = ['name'=>'Pelamar_id','visible'=>'false','value'=>$ResultID[0]->id];
-			$columns[] = ['label'=>'Tipe Identitas','name'=>'TipeIdentitas_id','type'=>'select','validation'=>'required|min:1|max:255','datatable'=>'hrdm106_tipeidentitas,NamaID'];
-			$columns[] = ['label'=>'No ID','name'=>'NoID','type'=>'text','required'=>true];
-			$columns[] = ['label'=>'Masa Berlaku','name'=>'MasaBerlaku','type'=>'text','required'=>true];
-			$columns[] = ['label'=>'Photo','name'=>'Photo','type'=>'upload','validation'=>'image|max:1000'];
-			$this ->form[] = ['label'=>'Identitas','name'=>'hrde101_pelamaridentity','type'=>'child','columns'=>$columns,'table'=>'hrde101_pelamaridentity','foreign_key'=>'Pelamar_id'];
+			// $columns = [];
+			// $columns[] = ['name'=>'Pelamar_id','visible'=>'false','value'=>$ResultID[0]->id];
+			// $columns[] = ['label'=>'Tipe Identitas','name'=>'TipeIdentitas_id','type'=>'select','validation'=>'required|min:1|max:255','datatable'=>'hrdm106_tipeidentitas,NamaID'];
+			// $columns[] = ['label'=>'No ID','name'=>'NoID','type'=>'text','required'=>true];
+			// $columns[] = ['label'=>'Masa Berlaku','name'=>'MasaBerlaku','type'=>'text','required'=>true];
+			// $columns[] = ['label'=>'Photo','name'=>'Photo','type'=>'upload','validation'=>'image|max:1000'];
+			// $this ->form[] = ['label'=>'Identitas','name'=>'hrde101_pelamaridentity','type'=>'child','columns'=>$columns,'table'=>'hrde101_pelamaridentity','foreign_key'=>'Pelamar_id'];
 
-			$columns2 = [];
-			$columns2[] = ['name'=>'Pelamar_id','visible'=>'false','value'=>$ResultID[0]->id];
-			$columns2[] = ['label'=>'Tingkat Pendidikan','name'=>'EducationLevel_id','type'=>'select','validation'=>'required|min:1|max:255','datatable'=>'hrdm107_educationlevel,EducationName'];
-			$columns2[] = ['label'=>'Nama Pendidikan','name'=>'EducationName','type'=>'text','required'=>true];
-			$columns2[] = ['label'=>'Tanggal Mulai','name'=>'From','type'=>'date','validation'=>'required|date_format:Y-m-d','value'=>date('Y-m-d')];
-			$columns2[] = ['label'=>'Tanggal Selesai','name'=>'To','type'=>'date','validation'=>'required|date_format:Y-m-d','value'=>date('Y-m-d')];
-			$columns2[] = ['label'=>'Nilai Akhir','name'=>'NilaiAkhir','type'=>'number','required'=>true];
-			$this ->form[] = ['label'=>'Pendidikan','name'=>'hrde102_pelamareducation','type'=>'child','columns'=>$columns2,'table'=>'hrde102_pelamareducation','foreign_key'=>'Pelamar_id'];
+			// $columns2 = [];
+			// $columns2[] = ['name'=>'Pelamar_id','visible'=>'false','value'=>$ResultID[0]->id];
+			// $columns2[] = ['label'=>'Tingkat Pendidikan','name'=>'EducationLevel_id','type'=>'select','validation'=>'required|min:1|max:255','datatable'=>'hrdm107_educationlevel,EducationName'];
+			// $columns2[] = ['label'=>'Nama Pendidikan','name'=>'EducationName','type'=>'text','required'=>true];
+			// $columns2[] = ['label'=>'Tanggal Mulai','name'=>'From','type'=>'date','validation'=>'required|date_format:Y-m-d','value'=>date('Y-m-d')];
+			// $columns2[] = ['label'=>'Tanggal Selesai','name'=>'To','type'=>'date','validation'=>'required|date_format:Y-m-d','value'=>date('Y-m-d')];
+			// $columns2[] = ['label'=>'Nilai Akhir','name'=>'NilaiAkhir','type'=>'number','required'=>true];
+			// $this ->form[] = ['label'=>'Pendidikan','name'=>'hrde102_pelamareducation','type'=>'child','columns'=>$columns2,'table'=>'hrde102_pelamareducation','foreign_key'=>'Pelamar_id'];
 
-			$columns3 = [];
-			$columns3[] = ['name'=>'Pelamar_id','visible'=>'false','value'=>$ResultID[0]->id];
-			$columns3[] = ['label'=>'Nama Perusahaan','name'=>'CorporateName','type'=>'text','required'=>true];
-			$columns3[] = ['label'=>'Jabatan Terakhir','name'=>'JabatanTerakhir','type'=>'text','required'=>true];
-			$columns3[] = ['label'=>'Periode Kerja','name'=>'PeriodeKerja','type'=>'text','required'=>true];
-			$columns3[] = ['label'=>'Deskripsi Pekerjaan','name'=>'DeskripsiPekerjaan','type'=>'textarea','required'=>true];
-			$this ->form[] = ['label'=>'Pengalaman Pekerjaan','name'=>'hrde103_pelamarexperience','type'=>'child','columns'=>$columns3,'table'=>'hrde103_pelamarexperience','foreign_key'=>'Pelamar_id'];
+			// $columns3 = [];
+			// $columns3[] = ['name'=>'Pelamar_id','visible'=>'false','value'=>$ResultID[0]->id];
+			// $columns3[] = ['label'=>'Nama Perusahaan','name'=>'CorporateName','type'=>'text','required'=>true];
+			// $columns3[] = ['label'=>'Jabatan Terakhir','name'=>'JabatanTerakhir','type'=>'text','required'=>true];
+			// $columns3[] = ['label'=>'Periode Kerja','name'=>'PeriodeKerja','type'=>'text','required'=>true];
+			// $columns3[] = ['label'=>'Deskripsi Pekerjaan','name'=>'DeskripsiPekerjaan','type'=>'textarea','required'=>true];
+			// $this ->form[] = ['label'=>'Pengalaman Pekerjaan','name'=>'hrde103_pelamarexperience','type'=>'child','columns'=>$columns3,'table'=>'hrde103_pelamarexperience','foreign_key'=>'Pelamar_id'];
 	
 
-			$this->form[] = ['label'=>'Keterangan','name'=>'Keterangan','width'=>'col-sm-10'];
+			// $this->form[] = ['label'=>'Keterangan','name'=>'Keterangan','width'=>'col-sm-10'];
 			//$this->addDate("TanggalLahir","TanggalLahir")->format("d/m/Y");
 			# END FORM DO NOT REMOVE THIS LINE
 
@@ -129,7 +130,9 @@
 	        | @showIf 	   = If condition when action show. Use field alias. e.g : [id] == 1
 	        | 
 	        */
-	        $this->addaction = array();
+	        $this->addaction[] = ['label'=>'Print','url'=>('PrintPelamar').'/[id]','icon'=>'fa fa-print','color'=>'info'];
+	        $this->addaction[] = ['url'=>('delete_pelamar').'/[id]','icon'=>'fa fa-trash','color'=>'danger','confirmation' => true];
+
 
 
 	        /* 
@@ -288,6 +291,15 @@
 	    */
 	    public function hook_query_index(&$query) {
 	        //Your code here
+
+	        $EmployeeID=Crudbooster::myId();
+			$EmpID=DB::table('cms_users')
+					->where('id','=',$EmployeeID)
+					->value('Employee_id');
+			$getUnitID=CRUDBooster::myUnitIDKeep();
+			$getJabatan=CRUDBooster::myPrivilegeId();
+
+			$query->orderBy('id','desc');
 	            
 	    }
 
@@ -394,8 +406,59 @@
 	    }
 
 
+public function delete_pelamar($id)
+{
 
-	    //By the way, you can still create your own method in here... :) 
+DB::table('hrde100_pelamar')
+		 ->where('id','=',$id)
+         ->delete();
 
 
+DB::table('hrde101_pelamaridentity')
+		 ->where('Pelamar_id','=',$id)
+         ->delete();
+
+DB::table('hrde102_pelamareducation')
+		 ->where('Pelamar_id','=',$id)
+         ->delete();
+
+DB::table('hrde102_pelamareducation')
+		 ->where('Pelamar_id','=',$id)
+         ->delete();
+
+CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"Data Berhasil Dihapus!","success");
+ 
+}
+	    
+
+		public function PrintPelamar($id)
+		{
+			$dataPelamar= DB::table('hrde100_pelamar as pelamar')
+							->select([
+								'pelamar.NamaPelamar as NamaPelamar',
+								'pelamar.TempatLahir as TempatLahir',
+								'pelamar.TanggalLahir as TanggalLahir',
+								'pelamar.Agama as Agama',
+								'jabatan.name as name',
+								'identity.TipeIdentitas_id as tipeidentitas',
+								'identity.NoID as nomoridentitas',
+								'identity.MasaBerlaku as MasaBerlaku',
+								'pelamar.Alamat as Alamat',
+								'pelamar.TelpHp as TelpHp',
+								'Status.StatusNikah as StatusNikah',
+								'pelamar.Email as Email',
+								DB::raw('CASE WHEN JenisKelamin = 0 THEN "Perempuan" ELSE "Laki-Laki" END AS JenisKelamin')
+								
+							])
+							->join('hrde101_pelamaridentity AS identity','identity.Pelamar_id','=','pelamar.id')
+							->join('cms_privileges AS jabatan','jabatan.id','=','pelamar.Jabatan_id')
+							->leftjoin('hrdm105_statusnikah as Status','Status.id','=','pelamar.StatusNikah_id')
+							->where('pelamar.id','=',$id)
+							->get();
+
+			  
+			$generatePDF = PDF::loadView('exports.PrintPelamar',array('dataPelamar'=>$dataPelamar))->setPaper('a4','potrait');
+			return $generatePDF->stream();
+
+		}
 	}

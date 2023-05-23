@@ -9,9 +9,10 @@
 	use Hash;
 	use App\Models\hrde100_Pelamar;
 	use App\Models\hrdt200_Interview;
-	use App\Models\hrde200_Employee;
+	use App\Models\hrde200_employee;
 	use App\Models\hrde201_employeeidentity;
 	use App\Models\hrde204_employeestatus;
+	use Carbon\Carbon;
 
 	class AdminEmployeeCustomController extends \crocodicstudio\crudbooster\controllers\CBController {
 
@@ -27,7 +28,7 @@
 			$this->button_action_style = "button_icon";
 			$this->button_add = true;
 			$this->button_edit = false;
-			$this->button_delete = true;
+			$this->button_delete = false;
 			$this->button_detail = true;
 			$this->button_show = false;
 			$this->button_filter = true;
@@ -35,14 +36,16 @@
 			$this->button_export = false;
 			$this->table = "hrde200_employee";
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
+            
+
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
 			$this->col[] = ["label"=>"NPK","name"=>"NPK"];
 			$this->col[] = ["label"=>"Nama Karyawan","name"=>"EmployeeName"];
-			$this->col[] = ["label"=>"Unit","name"=>"Unit_id","join"=>"hrdm101_Unit,UnitName"];
-			$this->col[] = ["label"=>"Perusahaan","name"=>"Company_id","join"=>"hrdm100_Company,CompanyName"];
-			$this->col[] = ["label"=>"Departement","name"=>"Departement_id","join"=>"hrdm102_departement,DepartementName"];
+			$this->col[] = ["label"=>"Unit","name"=>"Unit_id","join"=>"hrdm101_unit,UnitName"];
+			$this->col[] = ["label"=>"Perusahaan","name"=>"Company_id","join"=>"hrdm100_company,CompanyName"];
+			// $this->col[] = ["label"=>"Departement","name"=>"Departement_id","join"=>"hrdm102_departement,DepartementName"];
 			$this->col[] = ["label"=>"Jabatan","name"=>"Jabatan_id","join"=>"cms_privileges,name"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
@@ -54,9 +57,9 @@
 			$this->form[] = ['label'=>'NPK','name'=>'NPK','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Nama Karyawan','name'=>'EmployeeName','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Jabatan','name'=>'Jabatan_id','type'=>'select2','width'=>'col-sm-10','datatable'=>'cms_privileges,name'];
-			$this->form[] = ['label'=>'Level','name'=>'Level_id','type'=>'select2','width'=>'col-sm-10','datatable'=>'hrdm103_Level,LevelName'];
-			$this->form[] = ['label'=>'Unit','name'=>'Unit_id','type'=>'select2','width'=>'col-sm-10','datatable'=>'hrdm101_Unit,UnitName'];
-			$this->form[] = ['label'=>'Perusahaan','name'=>'Company_id','type'=>'select2','width'=>'col-sm-10','datatable'=>'hrdm100_Company,CompanyName'];
+			$this->form[] = ['label'=>'Level','name'=>'Level_id','type'=>'select2','width'=>'col-sm-10','datatable'=>'hrdm103_level,LevelName'];
+			$this->form[] = ['label'=>'Unit','name'=>'Unit_id','type'=>'select2','width'=>'col-sm-10','datatable'=>'hrdm101_unit,UnitName'];
+			$this->form[] = ['label'=>'Perusahaan','name'=>'Company_id','type'=>'select2','width'=>'col-sm-10','datatable'=>'hrdm100_company,CompanyName'];
 			$this->form[] = ['label'=>'Departemen','name'=>'Departement_id','type'=>'select2','width'=>'col-sm-10','datatable'=>'hrdm102_departement,DepartementName'];
 			$this->form[] = ['label'=>'Tempat Lahir','name'=>'TempatLahir','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Tanggal Lahir','name'=>'TanggalLahir','type'=>'date','validation'=>'required|date','width'=>'col-sm-10'];
@@ -117,12 +120,17 @@
 	        | 
 	        */
 			$this->addaction = array();
+			$this->addaction[] = ["label" =>"Resign",'url'=>('../admin/p103_resignemployee/add').'/[id]'.'/[Unit_id]'.'/[Jabatan_id]','icon'=>'fa fa-user','color'=>'warning'];
+			$this->addaction[] = ["label" =>"Mutasi",'url'=>('../admin/Mutasi%20Karyawan/add').'/[id]'.'/[Unit_id]'.'/[Jabatan_id]','icon'=>'fa fa-user','color'=>'primary'];
+
 			$this->addaction[] = [
-				"label" =>"Edit Karyawan",
+				"icon" =>"fa fa-pencil",
 				"name" =>"Edit_Karyawan",
 				"url" => CRUDBooster::mainpath('step1').'/[id]', 
 				"color" => "success"
 			];
+
+			$this->addaction[] = ['url'=>('employee_gotodump').'/[id]','icon'=>'fa fa-trash','color'=>'danger','confirmation' => true];
 
 
 	        /* 
@@ -416,7 +424,7 @@
 			
 			if($id == 0)
 			{
-				DB::table('hrde200_Employee')->insert([
+				DB::table('hrde200_employee')->insert([
 					'id' => $UUID,
 					'Pelamar_id' => Request::get('Pelamar_id'),
 					'Jabatan_id' => Request::get('Jabatan_id'),
@@ -470,7 +478,7 @@
 
 			else
 			{
-				DB::table('hrde200_Employee')->where('id',$id)->update([
+				DB::table('hrde200_employee')->where('id',$id)->update([
 					'Pelamar_id' => Request::get('Pelamar_id'),
 					'Jabatan_id' => Request::get('Jabatan_id'),
 					'Level_id' => Request::get('Level_id'),
@@ -785,7 +793,7 @@
 				])
 					->leftjoin('cms_privileges as pr','pr.id','=','emp.Jabatan_id')
 					->leftjoin('hrdm102_departement as oo','oo.id','=','emp.Departement_id')
-					->leftjoin('hrdm101_unit as bb','bb.Company_id','=','emp.Unit_id')
+					->leftjoin('hrdm101_unit as bb','bb.id','=','emp.Unit_id')
 					->leftjoin('hrde204_employeestatus AS sts','sts.Employee_id','=','sts.id')
 					->leftjoin('hrde201_employeeidentity AS idn','idn.Employee_id','=','emp.id')
 					//->leftjoin('cms_privileges AS jab','jab.id','=','emp.Jabatan_id')
@@ -1005,9 +1013,41 @@
 
 	    }
 
+        public function employee_gotodump($id){
+
+	    $query = DB::table('hrde200_employee')
+        ->select('Jabatan_id','Level_id','Unit_id','Company_id','Departement_id','NPK','EmployeeName','TempatLahir','TanggalLahir','JenisKelamin','StatusNikah_id','HiredDate','AlamatRumah','TelpRumah','TelpHp','Keterangan')
+        ->where('id','=',$id)
+        ->get();
+
+        foreach($query as $records){ 
+
+        DB::table('hrde205_employeedump')->insert(get_object_vars($records));}   
+        redirect('admin/get_employeeID/'.$id)->send();
+        }
+        
+        public function get_employeeID($id){
+
+	    $getEmployee_id=DB::table('hrde200_employee')
+					   ->where('id', $id)                   
+					   ->value('id');
+        Carbon::now()->timezone('Asia/Jakarta');
+        $created_at = Carbon::now();
+        
+        DB::table('hrde205_employeedump')
+		->where('id', \DB::raw("(select max(`id`) from hrde205_employeedump)"))
+        ->update(['Employee_id'=>$getEmployee_id, 'created_at'=> $created_at]);
+        redirect('admin/hapus_employee/'.$id)->send();
+        }
+
+        public function hapus_employee($id){
+
+	    DB::table('hrde200_employee')->where('id','=',$id)->delete();
+	    CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"Data Berhasil Dihapus!","success");
+        }
 
 
-	    //By the way, you can still create your own method in here... :) 
+
 
 
 	}

@@ -14,5 +14,14 @@ class hrde100_pelamar extends Model
     {
         return $this->hasOne('App\Models\hrdt200_interview','Pelamar_id');
     }
+
+    public function jabatan()
+    {
+        return $this->belongsTo(cms_privileges::class, 'Jabatan_id');
+    }
+     public function nikah()
+    {
+        return $this->belongsTo(hrdm105_statusnikah::class, 'StatusNikah_id');
+    }
     
 }

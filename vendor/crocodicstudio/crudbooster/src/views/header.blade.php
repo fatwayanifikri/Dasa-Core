@@ -35,7 +35,7 @@
                             <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 200px;">
                                 <ul class="menu" style="overflow: hidden; width: 100%; height: 200px;">
                                     <li>
-                                        <a href="#">
+                                        <a href="{{route('NotificationsControllerGetIndex')}}">
                                             <em>{{trans("crudbooster.text_no_notification")}}</em>
                                         </a>
                                     </li>

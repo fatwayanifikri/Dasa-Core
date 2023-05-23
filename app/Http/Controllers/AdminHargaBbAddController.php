@@ -1,0 +1,464 @@
+<?php namespace App\Http\Controllers;
+
+	use Session;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use CRUDBooster;
+use PDF;
+
+	class AdminHargaBbAddController extends \crocodicstudio\crudbooster\controllers\CBController {
+
+	    public function cbInit() {
+
+			# START CONFIGURATION DO NOT REMOVE THIS LINE
+			$this->title_field = "id";
+			$this->limit = "20";
+			$this->orderby = "id,desc";
+			$this->global_privilege = false;
+			$this->button_table_action = true;
+			$this->button_bulk_action = true;
+			$this->button_action_style = "button_icon";
+			$this->button_add = true;
+			$this->button_edit = true;
+			$this->button_delete = true;
+			$this->button_detail = true;
+			$this->button_show = true;
+			$this->button_filter = true;
+			$this->button_import = false;
+			$this->button_export = false;
+			$this->table = "loga008_hargabb";
+			# END CONFIGURATION DO NOT REMOVE THIS LINE
+
+			# START COLUMNS DO NOT REMOVE THIS LINE
+			$this->col = [];
+			$this->col[] = ["label"=>"Nama Barang","name"=>"barang_id","join"=>"loga007_hargabarang,nama_barang"];
+			$this->col[] = ["label"=>"Harga","name"=>"harga_barang"];
+			$this->col[] = ["label"=>"QTY","name"=>"qty"];
+			$this->col[] = ["label"=>"KTS","name"=>"kts"];
+			$this->col[] = ["label"=>"Satuan","name"=>"harga_satuan"];
+			$this->col[] = ["label"=>"Harga BB","name"=>"harga_bb"];
+			$this->col[] = ["label"=>"Mesin","name"=>"mesin"];
+			# END COLUMNS DO NOT REMOVE THIS LINE
+
+			# START FORM DO NOT REMOVE THIS LINE
+			$this->form = [];
+
+			$this->form[] = ['label'=>'Nama Barang','name'=>'barang_id','type'=>'datamodal','datamodal_table'=>'loga007_hargabarang','datamodal_where'=>'','validation'=>'required|min:1|max:255','width'=>'col-sm-5','datamodal_columns'=>'nama_barang,no_barang,harga_pajak','datamodal_columns_alias'=>'Nama Barang,Nomor Barang,Harga Barang','datamodal_select_to'=>'harga_pajak:harga_barang','datamodal_size'=>'large'];
+            
+            $this->form[] = ['label'=>'Harga','name'=>'harga_barang','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10',"readonly"=>'true'];
+
+			$this->form[] = ['label'=>'Qty','name'=>'qty','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Kts','name'=>'kts','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Satuan','name'=>'harga_satuan','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
+
+			$this->form[] = ['label'=>'Harga Bb','name'=>'harga_bb','type'=>'text','validation'=>'required|min:0','width'=>'col-sm-10',"readonly"=>'true'];
+
+			$this->form[] = ['label'=>'Mesin','name'=>'mesin','type'=>'select',"dataenum" => ["C7000/10000","Latex","Mimaki","Fotocopy IR","Epson","HP Blueprint","Press Mug","No. Produksi","VARIO"]];
+			# END FORM DO NOT REMOVE THIS LINE
+
+			# OLD START FORM
+			//$this->form = [];
+			//$this->form[] = ["label"=>"Barang Id","name"=>"barang_id","type"=>"select2","required"=>TRUE,"validation"=>"required|integer|min:0","datatable"=>"barang,id"];
+			//$this->form[] = ["label"=>"Qty","name"=>"qty","type"=>"number","required"=>TRUE,"validation"=>"required|integer|min:0"];
+			//$this->form[] = ["label"=>"Kts","name"=>"kts","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
+			//$this->form[] = ["label"=>"Satuan","name"=>"satuan","type"=>"number","required"=>TRUE,"validation"=>"required|integer|min:0"];
+			//$this->form[] = ["label"=>"Harga Bb","name"=>"harga_bb","type"=>"number","required"=>TRUE,"validation"=>"required|integer|min:0"];
+			//$this->form[] = ["label"=>"Mesin","name"=>"mesin","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
+			# OLD END FORM
+
+			/* 
+	        | ---------------------------------------------------------------------- 
+	        | Sub Module
+	        | ----------------------------------------------------------------------     
+			| @label          = Label of action 
+			| @path           = Path of sub module
+			| @foreign_key 	  = foreign key of sub table/module
+			| @button_color   = Bootstrap Class (primary,success,warning,danger)
+			| @button_icon    = Font Awesome Class  
+			| @parent_columns = Sparate with comma, e.g : name,created_at
+	        | 
+	        */
+	        $this->sub_module = array();
+
+
+	        /* 
+	        | ---------------------------------------------------------------------- 
+	        | Add More Action Button / Menu
+	        | ----------------------------------------------------------------------     
+	        | @label       = Label of action 
+	        | @url         = Target URL, you can use field alias. e.g : [id], [name], [title], etc
+	        | @icon        = Font awesome class icon. e.g : fa fa-bars
+	        | @color 	   = Default is primary. (primary, warning, succecss, info)     
+	        | @showIf 	   = If condition when action show. Use field alias. e.g : [id] == 1
+	        | 
+	        */
+	        $this->addaction = array();
+
+
+	        /* 
+	        | ---------------------------------------------------------------------- 
+	        | Add More Button Selected
+	        | ----------------------------------------------------------------------     
+	        | @label       = Label of action 
+	        | @icon 	   = Icon from fontawesome
+	        | @name 	   = Name of button 
+	        | Then about the action, you should code at actionButtonSelected method 
+	        | 
+	        */
+	        $this->button_selected = array();
+
+	                
+	        /* 
+	        | ---------------------------------------------------------------------- 
+	        | Add alert message to this module at overheader
+	        | ----------------------------------------------------------------------     
+	        | @message = Text of message 
+	        | @type    = warning,success,danger,info        
+	        | 
+	        */
+	        $this->alert        = array();
+	                
+
+	        
+	        /* 
+	        | ---------------------------------------------------------------------- 
+	        | Add more button to header button 
+	        | ----------------------------------------------------------------------     
+	        | @label = Name of button 
+	        | @url   = URL Target
+	        | @icon  = Icon from Awesome.
+	        | 
+	        */
+	        $this->index_button = array();
+
+
+
+	        /* 
+	        | ---------------------------------------------------------------------- 
+	        | Customize Table Row Color
+	        | ----------------------------------------------------------------------     
+	        | @condition = If condition. You may use field alias. E.g : [id] == 1
+	        | @color = Default is none. You can use bootstrap success,info,warning,danger,primary.        
+	        | 
+	        */
+	        $this->table_row_color = array();     	          
+
+	        
+	        /*
+	        | ---------------------------------------------------------------------- 
+	        | You may use this bellow array to add statistic at dashboard 
+	        | ---------------------------------------------------------------------- 
+	        | @label, @count, @icon, @color 
+	        |
+	        */
+	        $this->index_statistic = array();
+
+
+
+	        /*
+	        | ---------------------------------------------------------------------- 
+	        | Add javascript at body 
+	        | ---------------------------------------------------------------------- 
+	        | javascript code in the variable 
+	        | $this->script_js = "function() { ... }";
+	        |
+	        */
+	        $this->script_js = "
+			$(function() {
+
+			setInterval(function(){
+			var harga_bb = 0;	
+			var harga = $('#harga_barang').val();
+			var satuan = $('#harga_satuan').val();
+			var qty = $('#qty').val();
+			var hargaxqty = parseInt(harga) * parseInt(qty);
+			var total = parseInt(hargaxqty) / parseInt(satuan);
+            var hasil = Math.round(total * 100) / 100
+			$('#harga_bb').val(hasil);
+			}); 
+       
+			
+			});
+			";
+
+
+            /*
+	        | ---------------------------------------------------------------------- 
+	        | Include HTML Code before index table 
+	        | ---------------------------------------------------------------------- 
+	        | html code to display it before index table
+	        | $this->pre_index_html = "<p>test</p>";
+	        |
+	        */
+	        $this->pre_index_html = null;
+	        
+	        
+	        
+	        /*
+	        | ---------------------------------------------------------------------- 
+	        | Include HTML Code after index table 
+	        | ---------------------------------------------------------------------- 
+	        | html code to display it after index table
+	        | $this->post_index_html = "<p>test</p>";
+	        |
+	        */
+	        $this->post_index_html = null;
+	        
+	        
+	        
+	        /*
+	        | ---------------------------------------------------------------------- 
+	        | Include Javascript File 
+	        | ---------------------------------------------------------------------- 
+	        | URL of your javascript each array 
+	        | $this->load_js[] = asset("myfile.js");
+	        |
+	        */
+	        $this->load_js = array();
+	        
+	        
+	        
+	        /*
+	        | ---------------------------------------------------------------------- 
+	        | Add css style at body 
+	        | ---------------------------------------------------------------------- 
+	        | css code in the variable 
+	        | $this->style_css = ".style{....}";
+	        |
+	        */
+	        $this->style_css = NULL;
+	        
+	        
+	        
+	        /*
+	        | ---------------------------------------------------------------------- 
+	        | Include css File 
+	        | ---------------------------------------------------------------------- 
+	        | URL of your css each array 
+	        | $this->load_css[] = asset("myfile.css");
+	        |
+	        */
+	        $this->load_css = array();
+	        
+	        
+	    }
+
+
+	    /*
+	    | ---------------------------------------------------------------------- 
+	    | Hook for button selected
+	    | ---------------------------------------------------------------------- 
+	    | @id_selected = the id selected
+	    | @button_name = the name of button
+	    |
+	    */
+	    public function actionButtonSelected($id_selected,$button_name) {
+	        //Your code here
+	            
+	    }
+
+
+	    /*
+	    | ---------------------------------------------------------------------- 
+	    | Hook for manipulate query of index result 
+	    | ---------------------------------------------------------------------- 
+	    | @query = current sql query 
+	    |
+	    */
+	    public function hook_query_index(&$query) {
+	        //Your code here
+	            
+	    }
+
+	    /*
+	    | ---------------------------------------------------------------------- 
+	    | Hook for manipulate row of index table html 
+	    | ---------------------------------------------------------------------- 
+	    |
+	    */    
+	    public function hook_row_index($column_index,&$column_value) {	        
+	    	//Your code here
+	    }
+
+	    /*
+	    | ---------------------------------------------------------------------- 
+	    | Hook for manipulate data input before add data is execute
+	    | ---------------------------------------------------------------------- 
+	    | @arr
+	    |
+	    */
+	    public function hook_before_add(&$postdata) {        
+	        //Your code here
+
+	    }
+
+	    /* 
+	    | ---------------------------------------------------------------------- 
+	    | Hook for execute command after add public static function called 
+	    | ---------------------------------------------------------------------- 
+	    | @id = last insert id
+	    | 
+	    */
+	    public function hook_after_add($id) {        
+	        //Your code here
+
+	    }
+
+	    /* 
+	    | ---------------------------------------------------------------------- 
+	    | Hook for manipulate data input before update data is execute
+	    | ---------------------------------------------------------------------- 
+	    | @postdata = input post data 
+	    | @id       = current id 
+	    | 
+	    */
+	    public function hook_before_edit(&$postdata,$id) {        
+	        //Your code here
+
+	    }
+
+	    /* 
+	    | ---------------------------------------------------------------------- 
+	    | Hook for execute command after edit public static function called
+	    | ----------------------------------------------------------------------     
+	    | @id       = current id 
+	    | 
+	    */
+	    public function hook_after_edit($id) {
+	        //Your code here 
+
+	    }
+
+	    /* 
+	    | ---------------------------------------------------------------------- 
+	    | Hook for execute command before delete public static function called
+	    | ----------------------------------------------------------------------     
+	    | @id       = current id 
+	    | 
+	    */
+	    public function hook_before_delete($id) {
+	        //Your code here
+
+	    }
+
+	    /* 
+	    | ---------------------------------------------------------------------- 
+	    | Hook for execute command after delete public static function called
+	    | ----------------------------------------------------------------------     
+	    | @id       = current id 
+	    | 
+	    */
+	    public function hook_after_delete($id) {
+	        //Your code here
+
+	    }
+
+
+
+	    //By the way, you can still create your own method in here... :) 
+
+	    /*------------------------FUNGSI UNTUK MEMBUAT COSTUM VIEW--------------------*/
+
+public function getIndex() {
+
+   if(!CRUDBooster::isView()) CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
+
+$EmployeeID=Crudbooster::myId();
+$getJabatan=Crudbooster::myPrivilegeId();
+$id=DB::Table('loga007_hargabarang')
+	 ->where('id', \DB::raw("(select max(`id`) from loga007_hargabarang)"))
+	 ->value('id');
+$ResultID = $id + 1;	
+
+//---------------------------
+   $query = \App\Models\loga008_hargabb::when(request('NoPO'), function($query){
+	$query->whereHas('penerimaan', function($nested){
+	$nested->where('NoPO', request('NoPO'));
+	});
+	})
+   ->where('submit_status','=',null)
+   ->get();
+
+
+//---------------------------
+   $query2 = DB::table('hrdm101_unit')
+   ->get();
+
+//---------------------------
+   $query3 = DB::table('loga007_hargabarang')
+   ->get();
+
+
+   //untuk menampilkan data di view
+   $data = [];
+   $total = 0;
+   $data['absenlembur'] = 'Products Data';
+   $data['result'] = $query;
+   $data['unit'] = $query2;  
+   $data['barang'] = $query3;   
+  
+   $this->cbView('viewindex/custom_add_BOM',$data);
+}
+/*-------------------------------END COSTUM VIEW--------------------*/
+
+
+// INPUT DATA KE TABLE logt402_penerimaanbarangdetail
+
+public function input_BB_detail(Request $request)
+{
+
+$EmployeeID=Crudbooster::myId();
+$getJabatan=Crudbooster::myPrivilegeId();
+// $id=DB::Table('logt401_penerimaanbarang')
+// 	 ->where('id', \DB::raw("(select max(`id`) from logt401_penerimaanbarang)"))
+// 	 ->value('id');
+// $ResultID = $id + 1;		
+
+	DB::table('loga008_hargabb')->insert([ 
+
+		'barang_id' => $request->post('barang_id'),
+		'harga_barang' => $request->post('harga_barang'),
+		'qty' => $request->post('qty'),
+		'kts' => $request->post('kts'),
+		'harga_satuan' => $request->post('harga_satuan'),
+		'harga_bb' => $request->post('harga_bb'),
+		'mesin' => $request->post('mesin'),
+		'created_at' => $request->post('created_at'),
+		'created_by' => $EmployeeID,
+		
+	]);
+
+return back();
+
+}
+
+// MENU DELETE DATA 
+
+public function delete_hargabb($id)
+{
+
+DB::table('loga008_hargabb')
+		   ->where('id','=',$id)
+         ->delete();
+CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"Hapus Data Berhasil !","success");
+ 
+}
+
+// MENU KONFIRMASI SUBMIT DATA
+
+public function submit_confirm()
+{
+
+$EmployeeID=Crudbooster::myId();
+$getJabatan=Crudbooster::myPrivilegeId();
+
+DB::table('loga008_hargabb')
+		 ->where('created_by','=',$EmployeeID)
+         ->where('submit_status','=',null)
+         ->update(['submit_status'=>'1']);
+
+CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"Submit Data Berhasil !","success");
+ 
+}
+
+	}

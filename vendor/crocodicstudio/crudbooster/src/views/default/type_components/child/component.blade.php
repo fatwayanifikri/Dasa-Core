@@ -135,17 +135,18 @@ $name = str_slug($form['label'], '');
                                                            class='form-control {{$col['required']?"required":""}}'
                                                             {{($col['readonly']===true)?"readonly":""}}
                                                     />
-                                                    <!-- DitambahAdit-->
+                                                    <!--Konfigurasi input date-->
                                                     @elseif($col['type']=='date')
+                                                    <input id='{{$name_column}}' type='date' name='{{$col["name"]}}' class='form-control input_date {{$col['required']?"required":""}}' />
+
+                              <!--Konfigurasi input datetime-->
+                                @elseif($col['type'] =='datetime')
+                                <div class="input-group">           
+                                    <span class="input-group-addon"><a href='javascript:void(0)' onclick='$("#{{$name_column}}").data("daterangepicker").toggle()'><i class='fa fa-calendar'></i></a></span>
+                                    <input type='text' title="{{$col['label']}}" readonly class='form-control notfocus datetimepicker' name="{{$col["name"]}}" id="{{$name_column}}" value='{{$col["value"]}}'/>                   
+                                </div>
+
                                                     
-                                                    <div class='form-group form-datepicker {{$header_group_class}} {{ ($errors->first($col["name"]))?"has-error":"" }}' id='form-group-{{$name_column}}' style="{{@$form['style']}}">
-                                                        <div class="col-sm-12">
-                                                            <div class="input-group">
-                                                                <span class="input-group-addon open-datetimepicker"><a><i class='fa fa-calendar '></i></a></span>
-                                                                <input type='text' title="{{$col['label']}}" readonly {{$col['required']?"required":""}} {{($col['readonly']===true)?"readonly":""}} {!!$col['placeholder']!!} {{$col['disabled']}} class='form-control notfocus input_date' name="{{$name_column}}" id="{{$name_column}}" value='{{$value}}'/>
-                                                            </div>
-                                                        </div>
-                                                    </div>
                                                     <!-- SampaiSini-->
                                                 @elseif($col['type']=='textarea')
                                                     <textarea id='{{$name_column}}' name='child-{{$col["name"]}}'

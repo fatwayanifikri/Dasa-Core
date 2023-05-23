@@ -97,6 +97,11 @@
                             <td>{{ $row->Agama}}</td>
                         </tr>
                         <tr>
+                            <td>Jabatan</td>
+                            <td class="">:</td>
+                            <td>{{ $row->name}}</td>
+                        </tr>
+                        <tr>
                             <td>Status Perkawinan</td>
                             <td class="">:</td>
                             <td>{{ $row->StatusNikah}}</td>

@@ -4,6 +4,7 @@ use CRUDBooster;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Excel;
 use Illuminate\Support\Facades\PDF;
+use redirect;
 
 class NotificationsController extends CBController
 {
@@ -25,6 +26,7 @@ class NotificationsController extends CBController
 
         $this->col = [];
         $this->col[] = ["label" => "Content", "name" => "content", "callback_php" => '"<a href=\"'.$read_notification_url.'/$row->id\">$row->content</a>"'];
+     
         $this->col[] = ["label" => "Tanggal", "name" => "created_at"];
         $this->col[] = ["label" => "Dikirim Oleh", "name" => "created_by", "join" =>"cms_users,name" ];
         $this->col[] = [
@@ -56,13 +58,22 @@ class NotificationsController extends CBController
         $total = count($rows->get());
 
         return response()->json(['items' => $rows->get(), 'total' => $total]);
+
     }
 
     public function getRead($id)
     {
+        
+     $getJabatan=Crudbooster::myPrivilegeId();
+     
         DB::table('cms_notifications')->where('id', $id)->update(['is_read' => 1]);
+        // $row = DB::table('cms_notifications')->where('id_cms_users', $getJabatan)->first();
         $row = DB::table('cms_notifications')->where('id', $id)->first();
-
-        return redirect($row->url);
+      
+       // $link = DB::table('cms_notifications')->where('id_cms_users', $id)->get(['url'])->first();
+        //return redirect('admin/statistic_builder/dashboard');
+   
+       return redirect($row->url);
+       //return redirect()->route('row', [$row]);
     }
 }

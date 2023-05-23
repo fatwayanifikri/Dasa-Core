@@ -1,0 +1,13 @@
+//Menu Mesin Produksi
+- Fungsi Menu ini untuk input kapasitas mesin SM 52 & 74
+- Controller yang dipakai AdminProduksiView & AdminProduksiInput
+- Custom View ada di resources/viewindex Custom_Produksi_View & Custom_Produksi_Input
+- Jika data yang diinput melebihi kapasitas maka akan redirect ke halaman edit (overload), pop up akan muncul
+- Controller Overload namanya AdminProduksiInputOverloadController, 
+- halaman custum untuk overload namanya custom_produksi_edit_overload.blade
+
+//Menu Monitoring Mesin Produksi
+- Fungsi menu ini untuk pak dawam, cek kapasitas mesin yang masih sisa
+- Controller yang dipakai AdminProduksiMonitoringController
+- Custom view namanya custom_produksi_monitoring.blade
+----------------------------------------------------------------------------------------------------------------

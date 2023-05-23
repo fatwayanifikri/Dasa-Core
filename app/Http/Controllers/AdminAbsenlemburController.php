@@ -17,52 +17,82 @@
 			$this->button_table_action = true;
 			$this->button_bulk_action = true;
 			$this->button_action_style = "button_icon";
-			$this->button_add = false;
-			$this->button_edit = true;
+			$this->button_add = true;
 			$this->button_delete = false;
+			$this->button_edit= true;
 			$this->button_detail = true;
 			$this->button_show = true;
 			$this->button_filter = true;
 			$this->button_import = false;
-			$this->button_export = true;
+			$this->button_export = false;
 			$this->table = "t112_absenlembur";
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
 		//	$this->col[] = ["label"=>"Departement","name"=>"Departement_id","join"=>"hrdm102_departement,DepartementName"];
-			$this->col[] = ["label"=>"Nama Karyawan","name"=>"Employee_id","join"=>"hrde200_employee,EmployeeName"];
+			$this->col[] = ["label"=>"Karyawan","name"=>"Employee_id","join"=>"hrde200_employee,EmployeeName"];
 			$this->col[] = ["label"=>"Unit","name"=>"Unit_id","join"=>"hrdm101_unit,UnitName"];
 		//	$this->col[] = ["label"=>"Perusahaan","name"=>"Company_id","join"=>"hrdm100_company,CompanyName"];
 			$this->col[] = ["label"=>"Jabatan","name"=>"Jabatan_id","join"=>"cms_privileges,Name"];
-			$this->col[] = ["label"=>"Menit Lemburan","name"=>"id","join"=>"t112_absenlembur,AmountMinute"];
-			$this->col[] = ["label"=>"Voucher","name"=>"NomerVoucher"];
-			$this->col[] = ["label"=>"Approved","name"=>"isApproved"];
+			$this->col[] = ["label"=>"Menit Lembur","name"=>"id","join"=>"t112_absenlembur,AmountMinute"];
+			$this->col[] = ["label"=>"Nomor Voucher","name"=>"NomerVoucher"];
+			$this->col[] = ["label"=>"Status Approval","name"=>"isApproved"];
+			$this->col[] = ["label"=>"Status Voucher","name"=>"isVoucher"];
 			
 			# END COLUMNS DO NOT REMOVE THIS LINE
+			#Tambahan 
+			
+			$companyID=CRUDBooster::myCompanyID();
+			$getUnitID = CRUDBooster::myUnitIDKeep();
+			//dd($getUnitID);
+			// $PrivilegeId = CRUDBooster::MyPrivilegeId();
+			$ResultID = DB::select('select uuid_short() as id');
+			//----
+			//$getUnitID=Crudbooster::myUnitId();
+			$getJabatan=Crudbooster::myPrivilegeId();
+			$EmployeeID=Crudbooster::myId();
+			$EmpID=DB::table('cms_users')
+					->where('id','=',$EmployeeID)
+					->value('Employee_id');
 
-			#tambahan adit
+			$DeptID=DB::table('hrde200_employee')
+			->where('id','=',$EmpID)
+			->value('Departement_id');
+
+			#tambahan 
 			$ResultID = DB::select('select uuid_short() as id');
 			$nilai='12500';
 			//$UnitID = CRUDBooster::myUnitIDKeep();
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
-			$this->form[] = ['label'=>'Departement','name'=>'Departement_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrdm102_departement,DepartementName'];
-			$this->form[] = ['label'=>'Nama Karyawan','name'=>'Employee_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrde200_employee,EmployeeName','datatable_select_to'=>'EmployeeName:EmployeeName'];
-			$this->form[] = ['label'=>'Unit','name'=>'Unit_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrdm101_unit,UnitName'];
-			$this->form[] = ['label'=>'Perusahaan','name'=>'Company_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrdm100_company,CompanyName'];
-			$this->form[] = ['label'=>'Jabatan','name'=>'Jabatan_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'cms_privileges,Name'];
+			
+
+			$this->form[] = ['label'=>'Karyawan','name'=>'Employee_id','type'=>'select','width'=>'col-sm-5','datatable'=>'hrde200_employee,EmployeeName','value' =>$EmpID, 'readonly'=>true];
+
+			$this->form[] = ['label'=>'Jabatan','name'=>'Jabatan_id','type'=>'select','width'=>'col-sm-5','datatable'=>'cms_privileges,name','value' =>$getJabatan, 'readonly'=>true];
+
+			$this->form[] = ['label' => 'Unit','name'=>'Unit_id','type'=> 'select','width'=>'col-sm-5','datatable'=>'hrdm101_unit,UnitName','value' =>$getUnitID, 'readonly'=>true];
+
+			$this->form[] = ['label' => 'Departement','name'=>'Departement_id','type'=> 'select','width'=>'col-sm-5','datatable'=>'hrdm102_departement,DepartementName','value' =>$DeptID, 'readonly'=>true];
+
+			$this->form[] = ['label'=>'Perusahaan','name'=>'Company_id','type'=>'select','validation'=>'required|min:1|max:255','width'=>'col-sm-5','datatable'=>'hrdm100_company,CompanyName','value'=>$companyID,'readonly'=>true];
+
+
 			$this->form[] = ['label'=>'Nama Karyawan','name'=>'EmployeeName','type'=>'hidden','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Shift','name'=>'shift','validation'=>'required|min:1|max:255','width'=>'col-sm-2','type'=>'hidden','value'=>'Pagi'];
 			//dimatiin ga perlu 
 			//$this->form[] = ['label'=>'Tanggal Lembur','name'=>'ExtraTimeDate','type'=>'date','validation'=>'required|date','width'=>'col-sm-2'];
-			$this->form[] = ['label'=>'Mulai Lembur','name'=>'StartTime','type'=>'datetime','id'=>'StartTime','validation'=>'required','width'=>'col-sm-2'];
-			$this->form[] = ['label'=>'Selesai Lembur','name'=>'EndTime','type'=>'datetime','id'=>'EndTime','validation'=>'required','width'=>'col-sm-2'];
+			$this->form[] = ['label'=>'Mulai Lembur','name'=>'StartTime','type'=>'datetime','validation'=>'required','width'=>'col-sm-2'];
+			$this->form[] = ['label'=>'Selesai Lembur','name'=>'EndTime','type'=>'datetime','validation'=>'required','width'=>'col-sm-2'];
 			$this->form[] = ['label'=>'Menit Lembur','name'=>'AmountMinute','type'=>'number','id'=>'AmountMinute','validation'=>'required|integer|min:0','width'=>'col-sm-2','readonly'=>'true'];
-			$this->form[] = ['label'=>'Nomer Voucher','name'=>'NomerVoucher','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Jumlah Voucher','name'=>'JumlahVoucher','type'=>'number','id'=>'JumlahVoucher','validation'=>'required|integer|min:0','width'=>'col-sm-2'];
-			$this->form[] = ['label'=>'Nilai Voucher','name'=>'NilaiVoucher','type'=>'number','formula'=>"[$nilai]*[JumlahVoucher]",'id'=>'NilaiVoucher','validation'=>'required|integer|min:0','width'=>'col-sm-2',"readonly"=>'true'];
+			// $this->form[] = ['label'=>'Nomer Voucher','name'=>'NomerVoucher','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			// $this->form[] = ['label'=>'Jumlah Voucher','name'=>'JumlahVoucher','type'=>'number','id'=>'JumlahVoucher','validation'=>'required|integer|min:0','width'=>'col-sm-2'];
+			// $this->form[] = ['label'=>'Nilai Voucher','name'=>'NilaiVoucher','type'=>'number','formula'=>"[$nilai]*[JumlahVoucher]",'id'=>'NilaiVoucher','validation'=>'required|integer|min:0','width'=>'col-sm-2',"readonly"=>'true'];
 			$this->form[] = ['label'=>'Note','name'=>'Note','type'=>'textarea','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Persetujuan','name'=>'isApproved','type'=>'hidden','value'=>'0'];
+			$this->form[] = ['label'=>'Voucher','name'=>'isVoucher','type'=>'hidden','value'=>'0'];
+
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
@@ -108,6 +138,7 @@
 	        | 
 	        */
 			$this->addaction = array();
+			$this->addaction[] = ['url'=>('hapus_lembur').'/[id]','icon'=>'fa fa-trash','color'=>'danger','confirmation' => true];
 			// if(CRUDBooster::MyPrivilegeId()==11){
 			// 	$this->addaction[] = ['label'=>'Process','url'=>('lembur').'/[id]','icon'=>'fa fa-check','color'=>'success','showIf'=>"[isApproved] == 0"];
 			// }
@@ -168,6 +199,8 @@
 	        | 
 	        */
 			$this->table_row_color = array();  
+			$this->table_row_color[] = ['condition'=>"[isApproved]=='0'","color"=>"danger"];
+			$this->table_row_color[] = ['condition'=>"[isApproved]=='1'","color"=>"success"];	  
 		         
 
 	            /*
@@ -192,33 +225,18 @@
 			$this->script_js = "
 			$(function() {
 				
-				setInterval(function(){
-					var AmountTime = 0;	
-					var Start = $('#StartTime').val();
-					var Finish = $('#EndTime').val();
+			setInterval(function(){
+			var AmountTime = 0;	
+			var Start = $('#StartTime').val();
+			var Finish = $('#EndTime').val();
 	
-					var calculate = Math.abs(new Date(Finish) - new Date(Start));
-					var minutes = Math.floor((calculate/1000)/60);
+			var calculate = Math.abs(new Date(Finish) - new Date(Start));
+			var minutes = Math.floor((calculate/1000)/60);
 					
-					$('#AmountMinute').val(minutes);
-					},500);
-	
+			$('#AmountMinute').val(minutes);
+			},500);
 
 			});
-			//$(#JumlahVoucher).keyup
-			//1111
-			$(function(){
-				var nilai1 = $('#JumlahVoucher').val();
-				var Hasil1 = 12500 * number(nilai1);
-				$('#NilaiVoucher').val(Hasil1)
-			});
-			//22222
-			// function calculateMph() {
-			// 	var jmlvoucher = $('#JumlahVoucher').value;
-			// 	var nilai = 12500 * jmlvoucher
-			  
-			// 	$('#NilaiVoucher').val(nilai);
-			//   }
 			";
 
 
@@ -307,8 +325,17 @@
 	    */
 	    public function hook_query_index(&$query) {
 			//Your code here
-			$query->where('t112_absenlembur.isApproved','=','1');
-
+			//$query->where('t112_absenlembur.isApproved','=','1');
+			$EmployeeID=Crudbooster::myId();
+			$EmpID=DB::table('cms_users')
+					->where('id','=',$EmployeeID)
+					->value('Employee_id');
+			$getUnitID=CRUDBooster::myUnitIDKeep();
+			$getJabatan=CRUDBooster::myPrivilegeId();
+			//dd($getJabatan);
+			$query
+			->where('t112_absenlembur.Employee_id',$EmpID);
+// 			if($getUnitID == 1){
 			
 	            
 	    }
@@ -323,12 +350,34 @@
 			if($column_index == 6){
 				if($column_value == 0 )
 				{
-					$column_value = 'Tidak Di Setujui';
+					$column_value = 'Blm Di Setujui';
 				}
 				else
 				{
 					
 					$column_value = 'Setuju';
+				}
+
+			}
+
+		   if($column_index == 7){
+				if($column_value == 0){
+					$column_value ='Blm Dibuat';
+				}
+				elseif($column_value == 1){
+					$column_value = 'Dibuat';
+				}
+				elseif($column_value == 2){
+					$column_value = 'Diajukan';
+				}
+				elseif($column_value == 3){
+					$column_value = 'Dicairkan';
+				}
+				elseif($column_value == 4){
+					$column_value = 'Diterima';
+				}
+				elseif ($column_value == 0) {
+					$column_value = '';
 				}
 
 			}
@@ -360,6 +409,12 @@
 			// $config['to'] = CRUDBooster::adminPath('absenlembur/');
 			// $config['id_cms_users'] = [5];
 			// CRUDBooster::sendNotification($config);
+			$jumlahwaktu=Request::get('AmountMinute');
+			
+			if($jumlahwaktu > 299) {
+				DB::table('t112_absenlembur')->where('id',$id)->update(['isVoucher'=>'0']);
+			}
+
 
 	    }
 
@@ -385,6 +440,12 @@
 	    */
 	    public function hook_after_edit($id) {
 	        //Your code here 
+			$jumlahwaktu=Request::get('AmountMinute');
+			
+			if($jumlahwaktu > 299) {
+				DB::table('t112_absenlembur')->where('id',$id)->update(['isVoucher'=>'0']);
+			}
+	
 
 	    }
 
@@ -417,7 +478,21 @@
 
 	    }
 
+		public function getEdit($id) {
+		$edit = DB::table('t112_absenlembur')->where('id',$id)->first();
+		if($edit->isApproved != 0){
+			CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
+		}
+
+		$data = [];
+		$data['page_title'] = 'Edit Data';
+		$data['row'] = DB::table('t112_absenlembur')->where('id',$id)->first();
+
+		$this->cbView('crudbooster::default.form',$data);
+		}
     //By the way, you can still create your own method in here... :) 
+	
+
 
 
 	}

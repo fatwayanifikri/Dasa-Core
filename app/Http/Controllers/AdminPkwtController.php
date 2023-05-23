@@ -48,7 +48,7 @@
 			//$this->form[] = ['label'=>'NPK','name'=>'NPK','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			//$this->form[] = ['label'=>'EmployeeName','name'=>'Employee_id','type'=>'select2','width'=>'col-sm-10','datatable'=>'hrde200_employee,EmployeeName'];
 			//ganti tabel dari employe (spt diatas) ke pelamar
-			$this->form[]=['label'=>'Nama Pelamar','name'=>'Pelamar_id','type'=>'select2','width'=>'col-sm-4','datatable'=>'hrde100_pelamar,NamaPelamar','datatable_where'=>'FinalApprove != 0'];
+			$this->form[]=['label'=>'Nama Pelamar','name'=>'Pelamar_id','type'=>'select2','width'=>'col-sm-4','datatable'=>'hrde100_pelamar,NamaPelamar','datatable_where'=>'FinalApprove = 1'];
 			$this->form[] = ['label'=>'Status Karyawan','name'=>'EmployeeStatus_id','type'=>'select2','width'=>'col-sm-4','datatable'=>'hrdm108_employeestatus,StatusName'];
 			
 			$this->form[] = ['label'=>'Start','name'=>'Start','type'=>'date','validation'=>'required|min:1|max:255','width'=>'col-sm-4'];
@@ -97,15 +97,23 @@
 	        | 
 	        */
 	        $this->addaction = array();
-			if(CRUDBooster::MyPrivilegeId()==4){
-				$this->addaction[] = ['label'=>'Process','url'=>CRUDBooster::mainpath('set-status/active/[id]'),'icon'=>'fa fa-check','color'=>'success','showIf'=>"[isApproved] == 0"];
-			}
+			// if(CRUDBooster::MyPrivilegeId()==4){
+			// 	$this->addaction[] = ['label'=>'Process','url'=>CRUDBooster::mainpath('set-status/active/[id]'),'icon'=>'fa fa-check','color'=>'success','showIf'=>"[isApproved] == 0"];
+			// }
+            
+   //          elseif(CRUDBooster::MyPrivilegeId()==12){
+			// 	$this->addaction[] = ['label'=>'Process','url'=>CRUDBooster::mainpath('set-status/active/[id]'),'icon'=>'fa fa-check','color'=>'success','showIf'=>"[isApproved] == 0"];
+			// }
+
+			// elseif(CRUDBooster::MyPrivilegeId()==1){
+			// 	$this->addaction[] = ['label'=>'Process','url'=>CRUDBooster::mainpath('set-status/active/[id]'),'icon'=>'fa fa-check','color'=>'success','showIf'=>"[isApproved] == 0"];
+			// }
 
 			///ini adalah code print PKWT, yang di munculkan di action
-			$this->addaction[] =['label'=>'PKWT','url'=>('print_pkwt').'/[id]','icon'=>'fa fa-print','color'=>'info','showIf'=>"[isApproved] == 1"];
+			$this->addaction[] =['label'=>'PKWT','url'=>('print_pkwt').'/[id]','icon'=>'fa fa-print','color'=>'info','showIf'=>"[isStatus] == 1"];
 
 			///ini adalah code print Nota Dinas, yang di munculkan di action
-			$this->addaction[] =['label'=>'Nota Dinas','url'=>('print_notadinas').'/[id]','icon'=>'fa fa-print','color'=>'warning','showIf'=>"[isApproved] == 1"];
+			$this->addaction[] =['label'=>'Nota Dinas','url'=>('print_notadinas').'/[id]','icon'=>'fa fa-print','color'=>'warning','showIf'=>"[isStatus] == 1"];
 
 	        /* 
 	        | ---------------------------------------------------------------------- 
@@ -280,11 +288,15 @@
 			{
 				if($column_value == 0 )
 				{
-					$column_value = 'Tidak Di Setujui';
+					$column_value = 'Belum Di Setujui';
+				}
+				elseif($column_value == 1 )
+				{
+					$column_value = 'Setuju';
 				}
 				else
 				{
-					$column_value = 'Setuju';
+					$column_value = 'Tidak Di Setujui';
 				}
 
 			}
@@ -510,7 +522,7 @@
 			DB::table('hrde204_employeestatus')->where('id',$id)->update(['isApproved'=>'1']);
 			
 			//update status isApprovePKWT table pelamar (rusdi)
-			$getIDPelamar=table('hrde204_employeestatus')
+			$getIDPelamar=DB::table('hrde204_employeestatus')
 				->select('Pelamar_id')
 				->where('id',$id);
 

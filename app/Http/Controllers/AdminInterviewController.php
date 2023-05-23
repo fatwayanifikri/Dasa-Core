@@ -45,13 +45,17 @@
 			#ADD BUTTON
 			$Proses='4';
 			$ResultID = DB::select('select uuid_short() as id');
+			
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
 			$this->form[] = ['label'=>'hdfinterviewid','name'=>'id','type'=>'hidden','value'=>$ResultID[0]->id];
-			$this->form[]= ['label'=>'No Dokumen','name'=>'Employeerequest_id','type'=>'datamodal','datamodal_table'=>'hrdt100_employeerequest','datatable_where'=>'Unit_id=5','datamodal_columns'=>'NomerDokumen','datamodal_columns_alias'=>'NomerDokumen','datamodal_size'=>'large','required'=>true];
+			$this->form[]= ['label'=>'No Dokumen','name'=>'Employeerequest_id','type'=>'datamodal','datamodal_table'=>'hrdt100_employeerequest','datatable_where'=>'Unit_id=5','datamodal_columns'=>'NomerDokumen','datamodal_columns_alias'=>'NomerDokumen','datamodal_select_to'=>'Jabatan_id:Jabatan_id,Unit_id:Unit_id,Company_id:Company_id','datamodal_size'=>'large','required'=>true];
+
 			$this->form[] = ['label'=>'Nama Pelamar','name'=>'Pelamar_id','type'=>'datamodal','datamodal_table'=>'hrde100_pelamar','datamodal_where'=>'','datamodal_columns'=>'NamaPelamar,TempatLahir,TelpHp,TelpRumah','datamodal_columns_alias'=>'Nama,Tempat Lahir,TelpHp,TelpRumah','datamodal_size'=>'large','required'=>true];
+
 			$this->form[] = ['label'=>'Level','name'=>'Level_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrdm103_level,LevelName'];
 			$this->form[] = ['label'=>'Jabatan','name'=>'Jabatan_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'cms_privileges,Name'];
+
 			$this->form[] = ['label'=>'Unit','name'=>'Unit_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrdm101_unit,UnitName'];
 			$this->form[] = ['label'=>'Company','name'=>'Company_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrdm100_company,CompanyName'];
 			$this->form[] = ['label'=>'Departement','name'=>'Departement_id','type'=>'select2','validation'=>'required|min:1|max:255','width'=>'col-sm-10','datatable'=>'hrdm102_departement,DepartementName'];
@@ -295,8 +299,24 @@
 	    |
 	    */
 	    public function hook_query_index(&$query) {
-	        //Your code here
-			//$query->join('hrdt201_interviewapproval as approval','hrdt200_interview.id','=','approval.interview_id') 
+	        $EmployeeID=Crudbooster::myId();
+            $EmpID=DB::table('cms_users')
+		 	 ->where('id','=',$EmployeeID)
+		 	 ->value('Employee_id');
+			$getUnitID=CRUDBooster::myUnitIDKeep();
+			$getJabatan=CRUDBooster::myPrivilegeId();
+
+			if($getJabatan == 62 || $getJabatan == 63 || $getJabatan == 64 || $getJabatan == 65 || $getJabatan == 66 || $getJabatan == 16){
+				$query;	
+			}
+
+			elseif($getJabatan == 1 || $getJabatan == 8 || $getJabatan == 9){
+				$query;	
+			}
+
+			else{
+            	redirect('admin/statistic_builder/dashboard')->send();
+			}
 			
 	    }
 
@@ -458,6 +478,7 @@
 								'pelamar1.TempatLahir as TempatLahir',
 								'pelamar1.TanggalLahir as TanggalLahir',
 								'pelamar1.Agama as Agama',
+								'jabatan.name as name',
 								'pelamar1.Alamat as Alamat',
 								'pelamar1.TelpHp as TelpHp',
 								'Status.StatusNikah as StatusNikah',
@@ -466,17 +487,17 @@
 								
 							])
 							->join('hrde100_pelamar AS pelamar1','pelamar1.id','=','interview.Pelamar_id')
-							->join('hrdm104_jabatan AS jabatan','jabatan.id','=','interview.Jabatan_id')
+							->join('cms_privileges AS jabatan','jabatan.id','=','pelamar1.Jabatan_id')
 							->leftjoin('hrdm105_statusnikah as Status','Status.id','=','pelamar1.StatusNikah_id')
 							->where('interview.id','=',$id)
 							->get();
 
 			  
-			$generatePDF = PDF::loadView('pdf.PrintInterview',array('dataInterview'=>$dataInterview))->setPaper('a4','potrait');
+			$generatePDF = PDF::loadView('pdf.PrintInterview',array('dataInterview'=>$dataInterview))->setPaper('a4','potrait'); 
 			return $generatePDF->stream();
 
 		}
-	    //By the way, you can still create your own method in here... :) 
 
+	
 
 	}

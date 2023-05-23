@@ -4,6 +4,8 @@
 	use Request;
 	use DB;
 	use CRUDBooster;
+	use PDF;
+	use Excel;
 
 	class AdminInboxInterviewController extends \crocodicstudio\crudbooster\controllers\CBController {
 
@@ -65,7 +67,7 @@
 			$columns[] = ['label'=>'Tanggal','name'=>'ApprovedDate','type'=>'date','validation'=>'required|date_format:Y-m-d','value'=>date('Y-m-d', time())];
 			//$columns[] = ['label'=>'Tanggal','name'=>'ApprovedDate','type'=>'date','width'=>'col-sm-10'];
 			$columns[] = ['label'=>'Keterangan','name'=>'Keterangan','type'=>'textarea','required'=>true];
-			$this ->form[] = ['label'=>'Approved','name'=>'hrdt201_interviewapproval','type'=>'child','columns'=>$columns,'table'=>'hrdt201_InterviewApproval','foreign_key'=>'Interview_id'];
+			$this ->form[] = ['label'=>'Approved','name'=>'hrdt201_interviewapproval','type'=>'child','columns'=>$columns,'table'=>'hrdt201_interviewapproval','foreign_key'=>'Interview_id'];
 
 
 
@@ -121,6 +123,8 @@
 	        | 
 	        */
 	        $this->addaction = array();
+	         $this->addaction[] = ["label" =>"Penilaian Praktik",'url'=>('penilaian_praktik').'/[id]','icon'=>'fa fa-user','color'=>'success'];
+	        $this->addaction[] = ["label" =>"Laporan Inter..",'url'=>('laporan_interview').'/[id]','icon'=>'fa fa-user','color'=>'warning'];
 			//$JabatanID=CRUDBooster::myPrivilagesId();
 
 			//if ($JabatanID=='4'){
@@ -379,7 +383,7 @@
 //re
 //			return $getPelamarID;
 
-				if ($getApprove > '1')
+				if ($getApprove > '0')
 				{
 					DB::table('hrde100_pelamar')->where('id',$getPelamarID)->update(['FinalApprove' => '1']);
 					//DB::tabel('hrde100_pelamar')
@@ -420,8 +424,61 @@
 	    }
 
 
+		public function laporan_interview($id)
+		{
+			$data= DB::table('hrdt200_interview as interview')
+							->select([
+								'pelamar1.NamaPelamar as NamaPelamar',
+								'pelamar1.TempatLahir as TempatLahir',
+								'pelamar1.TanggalLahir as TanggalLahir',
+								'pelamar1.Agama as Agama',
+								'jabatan.name as name',
+								'pelamar1.Alamat as Alamat',
+								'pelamar1.TelpHp as TelpHp',
+								'Status.StatusNikah as StatusNikah',
+								'pelamar1.Email as Email',
+								DB::raw('CASE WHEN JenisKelamin = 0 THEN "Perempuan" ELSE "Laki-Laki" END AS JenisKelamin')
+								
+							])
+							->join('hrde100_pelamar AS pelamar1','pelamar1.id','=','interview.Pelamar_id')
+							->join('cms_privileges AS jabatan','jabatan.id','=','pelamar1.Jabatan_id')
+							->leftjoin('hrdm105_statusnikah as Status','Status.id','=','pelamar1.StatusNikah_id')
+							->where('interview.id','=',$id)
+							->get();
 
-	    //By the way, you can still create your own method in here... :) 
+			  
+			$generatePDF = PDF::loadView('exports.PrintLaporanInterview',array('data'=>$data))->setPaper('a4','potrait'); 
+			return $generatePDF->stream();
+
+		}
+
+public function penilaian_praktik($id)
+		{
+			$data2= DB::table('hrdt200_interview as interview')
+							->select([
+								'pelamar1.NamaPelamar as NamaPelamar',
+								'pelamar1.TempatLahir as TempatLahir',
+								'pelamar1.TanggalLahir as TanggalLahir',
+								'pelamar1.Agama as Agama',
+								'jabatan.name as name',
+								'pelamar1.Alamat as Alamat',
+								'pelamar1.TelpHp as TelpHp',
+								'Status.StatusNikah as StatusNikah',
+								'pelamar1.Email as Email',
+								DB::raw('CASE WHEN JenisKelamin = 0 THEN "Perempuan" ELSE "Laki-Laki" END AS JenisKelamin')
+								
+							])
+							->join('hrde100_pelamar AS pelamar1','pelamar1.id','=','interview.Pelamar_id')
+							->join('cms_privileges AS jabatan','jabatan.id','=','pelamar1.Jabatan_id')
+							->leftjoin('hrdm105_statusnikah as Status','Status.id','=','pelamar1.StatusNikah_id')
+							->where('interview.id','=',$id)
+							->get();
+
+			  
+			$generatePDF = PDF::loadView('exports.PrintPenilaianPraktik',array('data2'=>$data2))->setPaper('a4','potrait'); 
+			return $generatePDF->stream();
+
+		}
 
 
 	}
